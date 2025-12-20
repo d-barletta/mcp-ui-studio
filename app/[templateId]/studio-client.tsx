@@ -20,10 +20,11 @@ import { Template, ContentType } from '@/lib/types';
 import { templates } from '@/lib/templates';
 import { ExportPanel } from '@/components/export-panel';
 import { CodeEditor } from '@/components/code-editor';
+import { VisualEditor } from '@/components/visual-editor';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { ArrowLeft, Code, Eye, Download, AlertCircle, Terminal, RotateCw } from 'lucide-react';
+import { ArrowLeft, Code, Eye, Download, AlertCircle, Terminal, RotateCw, Palette } from 'lucide-react';
 import { ThemeSwitcher } from '@/components/theme-switcher';
 import { Logo } from '@/components/logo';
 import { UIResourceRenderer, remoteButtonDefinition, remoteTextDefinition } from '@mcp-ui/client';
@@ -92,7 +93,7 @@ export default function StudioClient() {
   const [editedContent, setEditedContent] = useState<ContentType | null>(null);
   const [editorCode, setEditorCode] = useState<string>('');
   const [contentError, setContentError] = useState<string | null>(null);
-  const [rightPanelTab, setRightPanelTab] = useState<'editor' | 'console'>('editor');
+  const [rightPanelTab, setRightPanelTab] = useState<'editor' | 'visual' | 'console'>('visual');
   const [consoleMessages, setConsoleMessages] = useState<ConsoleMessage[]>([]);
   const [unreadCount, setUnreadCount] = useState(0);
   const [refreshKey, setRefreshKey] = useState(0);
@@ -139,7 +140,7 @@ export default function StudioClient() {
       data
     };
     setConsoleMessages(prev => [...prev, message]);
-    if (rightPanelTab === 'editor') {
+    if (rightPanelTab !== 'console') {
       setUnreadCount(prev => prev + 1);
     }
   };
@@ -233,6 +234,12 @@ export default function StudioClient() {
     } catch (error) {
       setContentError('Invalid UI format');
     }
+  };
+
+  const handleVisualEditorChange = (config: { content: ContentType; uri: string; encoding: 'text' | 'blob' }) => {
+    setEditedContent(config.content);
+    setEditorCode(generateEditorCode(config.content));
+    setContentError(null);
   };
 
   if (!selectedTemplate || !editedContent) {
@@ -356,6 +363,17 @@ export default function StudioClient() {
                 <div className="border-b bg-muted/50">
                   <div className="flex">
                     <button
+                      onClick={() => setRightPanelTab('visual')}
+                      className={`flex-1 px-4 py-3 text-sm font-medium transition-colors ${
+                        rightPanelTab === 'visual'
+                          ? 'bg-background border-b-2 border-primary text-foreground'
+                          : 'text-muted-foreground hover:text-foreground'
+                      }`}
+                    >
+                      <Palette className="h-4 w-4 inline-block mr-2" />
+                      Visual
+                    </button>
+                    <button
                       onClick={() => setRightPanelTab('editor')}
                       className={`flex-1 px-4 py-3 text-sm font-medium transition-colors ${
                         rightPanelTab === 'editor'
@@ -376,7 +394,7 @@ export default function StudioClient() {
                     >
                       <Terminal className="h-4 w-4 inline-block mr-2" />
                       Console
-                      {unreadCount > 0 && rightPanelTab === 'editor' && (
+                      {unreadCount > 0 && rightPanelTab !== 'console' && (
                         <span className="ml-2 inline-flex items-center justify-center h-5 w-5 text-xs font-bold text-white bg-red-500 rounded-full">
                           {unreadCount}
                         </span>
@@ -385,7 +403,18 @@ export default function StudioClient() {
                   </div>
                 </div>
 
-                {rightPanelTab === 'editor' ? (
+                {rightPanelTab === 'visual' && (
+                  <div className="flex-1 min-h-0">
+                    <VisualEditor
+                      content={currentContent}
+                      uri="ui://my-component/instance-1"
+                      encoding="text"
+                      onChange={handleVisualEditorChange}
+                    />
+                  </div>
+                )}
+
+                {rightPanelTab === 'editor' && (
                   <div className="flex-1 min-h-0 flex flex-col">
                     <div className="p-4 border-b bg-muted/50 flex items-center justify-between">
                       <div>
@@ -420,7 +449,9 @@ export default function StudioClient() {
                       />
                     </div>
                   </div>
-                ) : (
+                )}
+
+                {rightPanelTab === 'console' && (
                   <div className="flex-1 min-h-0 flex flex-col">
                     <div className="p-4 border-b bg-muted/50 flex items-center justify-between">
                       <div>
