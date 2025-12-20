@@ -1,10 +1,15 @@
 import { ContentType, Encoding, UIResource, ExportLanguage } from './types';
 
-export function createUIResource(
-  uri: string,
-  content: ContentType,
-  encoding: Encoding = 'text'
-): UIResource {
+// Options interface matching MCP-UI official API
+export interface CreateUIResourceOptions {
+  uri: string;
+  content: ContentType;
+  encoding?: Encoding;
+}
+
+export function createUIResource(options: CreateUIResourceOptions): UIResource {
+  const { uri, content, encoding = 'text' } = options;
+  
   let mimeType: UIResource['resource']['mimeType'];
   let resourceContent: string;
 
