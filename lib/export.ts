@@ -1,78 +1,156 @@
-import { MCPUIComponent, ExportLanguage } from './types';
+import { ContentType, Encoding, UIResource, ExportLanguage } from './types';
 
-export function generateTypeScriptExport(component: MCPUIComponent): string {
+export function createUIResource(
+  uri: string,
+  content: ContentType,
+  encoding: Encoding = 'text'
+): UIResource {
+  let mimeType: UIResource['resource']['mimeType'];
+  let resourceContent: string;
+
+  if (content.type === 'rawHtml') {
+    mimeType = 'text/html';
+    resourceContent = content.htmlString;
+  } else if (content.type === 'externalUrl') {
+    mimeType = 'text/uri-list';
+    resourceContent = content.iframeUrl;
+  } else {
+    mimeType = `application/vnd.mcp-ui.remote-dom+javascript; framework=${content.framework}` as UIResource['resource']['mimeType'];
+    resourceContent = content.script;
+  }
+
+  const resource: UIResource = {
+    type: 'resource',
+    resource: {
+      uri,
+      mimeType,
+    },
+  };
+
+  if (encoding === 'text') {
+    resource.resource.text = resourceContent;
+  } else {
+    resource.resource.blob = Buffer.from(resourceContent).toString('base64');
+  }
+
+  return resource;
+}
+
+export function generateTypeScriptExport(content: ContentType, encoding: Encoding = 'text'): string {
+  const contentStr = JSON.stringify(content, null, 2)
+    .replace(/"type": "rawHtml"/g, "type: 'rawHtml'")
+    .replace(/"type": "externalUrl"/g, "type: 'externalUrl'")
+    .replace(/"type": "remoteDom"/g, "type: 'remoteDom'")
+    .replace(/"htmlString":/g, 'htmlString:')
+    .replace(/"iframeUrl":/g, 'iframeUrl:')
+    .replace(/"script":/g, 'script:')
+    .replace(/"framework": "react"/g, "framework: 'react'")
+    .replace(/"framework": "webcomponents"/g, "framework: 'webcomponents'");
+
   return `// MCP-UI Handler - TypeScript
-import { MCPUIHandler } from '@modelcontextprotocol/sdk';
+import { createUIResource } from '@mcp-ui/server';
 
-export const handler: MCPUIHandler = {
-  render: () => ${JSON.stringify(component, null, 2)}
-};
+const resource = createUIResource({
+  uri: 'ui://my-component/instance-1',
+  content: ${contentStr},
+  encoding: '${encoding}',
+});
+
+// Return in MCP response
+export function handler() {
+  return { content: [resource] };
+}
 
 // Usage example:
-// server.addHandler('ui', handler);
+// server.setRequestHandler(ListToolsRequestSchema, async () => ({
+//   tools: [{ name: 'ui-component', description: 'Interactive UI', inputSchema: { type: 'object', properties: {} } }]
+// }));
+// server.setRequestHandler(CallToolRequestSchema, async (request) => handler());
 `;
 }
 
-export function generatePythonExport(component: MCPUIComponent): string {
-  const jsonStr = JSON.stringify(component, null, 2);
-  return `# MCP-UI Handler - Python
-from mcp.server import MCPServer
-from mcp.types import UIComponent
+export function generatePythonExport(content: ContentType, encoding: Encoding = 'text'): string {
+  let contentDict: string;
+  if (content.type === 'rawHtml') {
+    contentDict = `{ "type": "rawHtml", "htmlString": """${content.htmlString}""" }`;
+  } else if (content.type === 'externalUrl') {
+    contentDict = `{ "type": "externalUrl", "iframeUrl": "${content.iframeUrl}" }`;
+  } else {
+    contentDict = `{ "type": "remoteDom", "script": """${content.script}""", "framework": "${content.framework}" }`;
+  }
 
-def render() -> UIComponent:
-    """Render the MCP-UI component."""
-    return ${jsonStr.replace(/"/g, '"').replace(/true/g, 'True').replace(/false/g, 'False').replace(/null/g, 'None')}
+  return `# MCP-UI Handler - Python
+from mcp_ui_server import create_ui_resource
+
+def handler():
+    """Create and return MCP-UI resource."""
+    resource = create_ui_resource(
+        uri='ui://my-component/instance-1',
+        content=${contentDict},
+        encoding='${encoding}'
+    )
+    return { "content": [resource] }
 
 # Usage example:
-# server.add_ui_handler("ui", render)
+# @server.call_tool()
+# async def call_tool(name: str, arguments: dict) -> list[TextContent | ImageContent | EmbeddedResource]:
+#     return handler()["content"]
 `;
 }
 
-export function generateRubyExport(component: MCPUIComponent): string {
-  const jsonStr = JSON.stringify(component, null, 2);
-  return `# MCP-UI Handler - Ruby
-require 'mcp/server'
+export function generateRubyExport(content: ContentType, encoding: Encoding = 'text'): string {
+  let contentHash: string;
+  if (content.type === 'rawHtml') {
+    contentHash = `{ type: :raw_html, htmlString: '${content.htmlString.replace(/'/g, "\\'")}'  }`;
+  } else if (content.type === 'externalUrl') {
+    contentHash = `{ type: :external_url, iframeUrl: '${content.iframeUrl}' }`;
+  } else {
+    contentHash = `{ type: :remote_dom, script: <<~SCRIPT\n${content.script}\nSCRIPT\n, framework: :${content.framework} }`;
+  }
 
-class UIHandler
-  def self.render
-    ${jsonStr}
-  end
+  return `# MCP-UI Handler - Ruby
+require 'mcp_ui_server'
+
+def handler
+  resource = McpUiServer.create_ui_resource(
+    uri: 'ui://my-component/instance-1',
+    content: ${contentHash},
+    encoding: :${encoding}
+  )
+  
+  { content: [resource] }
 end
 
 # Usage example:
-# server.add_ui_handler('ui', UIHandler.method(:render))
+# server.tool('ui-component', 'Interactive UI') do
+#   handler[:content]
+# end
 `;
 }
 
-export function generateExport(component: MCPUIComponent, language: ExportLanguage): string {
+export function generateExport(
+  content: ContentType,
+  language: ExportLanguage,
+  encoding: Encoding = 'text'
+): string {
   switch (language) {
     case 'typescript':
-      return generateTypeScriptExport(component);
+      return generateTypeScriptExport(content, encoding);
     case 'python':
-      return generatePythonExport(component);
+      return generatePythonExport(content, encoding);
     case 'ruby':
-      return generateRubyExport(component);
+      return generateRubyExport(content, encoding);
     default:
-      return generateTypeScriptExport(component);
+      return generateTypeScriptExport(content, encoding);
   }
 }
 
-// Framework bridge: Convert Shadcn-like structure to MCP-UI
-export function convertShadcnToMCPUI(_shadcnCode: string): MCPUIComponent {
+// Framework bridge: Convert Shadcn/HTML to MCP-UI
+export function convertShadcnToMCPUI(_shadcnCode: string): ContentType {
   // This is a simplified converter - in production, this would parse JSX/TSX
-  // For now, we'll return a basic structure
+  // For now, we'll return a basic HTML structure
   return {
-    type: 'container',
-    props: {
-      className: 'converted-from-shadcn'
-    },
-    children: [
-      {
-        type: 'text',
-        props: {
-          content: 'Converted component'
-        }
-      }
-    ]
+    type: 'rawHtml',
+    htmlString: '<div class="converted-from-shadcn"><p>Converted component</p></div>'
   };
 }

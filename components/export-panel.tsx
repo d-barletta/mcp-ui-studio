@@ -6,18 +6,18 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { CodeEditor } from './code-editor';
 import { generateExport } from '@/lib/export';
-import { MCPUIComponent, ExportLanguage } from '@/lib/types';
+import { ContentType, ExportLanguage } from '@/lib/types';
 import { Download, Copy, Check } from 'lucide-react';
 
 interface ExportPanelProps {
-  component: MCPUIComponent;
+  content: ContentType;
 }
 
-export function ExportPanel({ component }: ExportPanelProps) {
+export function ExportPanel({ content }: ExportPanelProps) {
   const [language, setLanguage] = useState<ExportLanguage>('typescript');
   const [copied, setCopied] = useState(false);
 
-  const exportCode = generateExport(component, language);
+  const exportCode = generateExport(content, language, 'text');
 
   const handleCopy = async () => {
     await navigator.clipboard.writeText(exportCode);

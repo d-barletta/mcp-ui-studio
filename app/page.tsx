@@ -91,22 +91,47 @@ export default function StudioPage() {
             <div className="h-full grid grid-cols-1 lg:grid-cols-2 divide-x">
               {/* Preview Panel */}
               <div className="h-full overflow-hidden">
-                <ScrollArea className="h-full">
-                  <LivePreview component={selectedTemplate.mcpui} />
-                </ScrollArea>
+                <div className="h-full p-4">
+                  {selectedTemplate.content.type === 'rawHtml' && (
+                    <iframe
+                      srcDoc={selectedTemplate.content.htmlString}
+                      className="w-full h-full border border-border rounded-lg bg-white"
+                      sandbox="allow-scripts"
+                      title="MCP-UI Preview"
+                    />
+                  )}
+                  {selectedTemplate.content.type === 'externalUrl' && (
+                    <iframe
+                      src={selectedTemplate.content.iframeUrl}
+                      className="w-full h-full border border-border rounded-lg bg-white"
+                      sandbox="allow-scripts allow-same-origin"
+                      title="External URL Preview"
+                    />
+                  )}
+                  {selectedTemplate.content.type === 'remoteDom' && (
+                    <div className="flex items-center justify-center h-full border border-border rounded-lg bg-muted/20">
+                      <div className="text-center text-muted-foreground p-8">
+                        <Code className="h-12 w-12 mx-auto mb-4 opacity-50" />
+                        <p className="font-semibold mb-2">Remote DOM Component</p>
+                        <p className="text-sm">Framework: {selectedTemplate.content.framework}</p>
+                        <p className="text-xs mt-4">Preview requires @mcp-ui/client renderer</p>
+                      </div>
+                    </div>
+                  )}
+                </div>
               </div>
 
-              {/* Component JSON Panel */}
+              {/* Content JSON Panel */}
               <div className="h-full flex flex-col">
                 <div className="p-4 border-b bg-muted/50">
-                  <h3 className="font-semibold">MCP-UI Structure</h3>
+                  <h3 className="font-semibold">MCP-UI Content</h3>
                   <p className="text-xs text-muted-foreground mt-1">
-                    Component definition in JSON format
+                    Content definition for createUIResource
                   </p>
                 </div>
                 <div className="flex-1 min-h-0">
                   <CodeEditor
-                    code={JSON.stringify(selectedTemplate.mcpui, null, 2)}
+                    code={JSON.stringify(selectedTemplate.content, null, 2)}
                     language="typescript"
                     readOnly
                   />
@@ -118,9 +143,9 @@ export default function StudioPage() {
           <TabsContent value="code" className="flex-1 m-0">
             <div className="h-full flex flex-col">
               <div className="p-4 border-b bg-muted/50">
-                <h3 className="font-semibold">Edit Component</h3>
+                <h3 className="font-semibold">Preview Code</h3>
                 <p className="text-xs text-muted-foreground mt-1">
-                  Modify the MCP-UI component structure (preview only)
+                  HTML preview of the component
                 </p>
               </div>
               <div className="flex-1 min-h-0">
@@ -135,7 +160,7 @@ export default function StudioPage() {
           <TabsContent value="export" className="flex-1 m-0 p-0">
             <ScrollArea className="h-full">
               <div className="p-8 max-w-4xl mx-auto">
-                <ExportPanel component={selectedTemplate.mcpui} />
+                <ExportPanel content={selectedTemplate.content} />
               </div>
             </ScrollArea>
           </TabsContent>
