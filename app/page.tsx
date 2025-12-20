@@ -290,7 +290,7 @@ export default function StudioPage() {
                       key={currentContent.htmlString}
                       srcDoc={currentContent.htmlString}
                       className="w-full h-full border border-border rounded-lg bg-white"
-                      sandbox="allow-scripts"
+                      sandbox="allow-scripts allow-forms allow-same-origin allow-modals allow-popups"
                       title="MCP-UI Preview"
                     />
                   )}
@@ -299,7 +299,7 @@ export default function StudioPage() {
                       key={currentContent.iframeUrl}
                       src={currentContent.iframeUrl}
                       className="w-full h-full border border-border rounded-lg bg-white"
-                      sandbox="allow-scripts allow-same-origin"
+                      sandbox="allow-scripts allow-forms allow-same-origin allow-modals allow-popups"
                       title="External URL Preview"
                     />
                   )}
@@ -318,7 +318,7 @@ export default function StudioPage() {
                           key={`${currentContent.script}-${currentContent.framework}`}
                           resource={JSON.stringify({
                             uri: 'ui://remote-component/preview',
-                            mimeType: `application/vnd.mcp-ui.remote-dom+javascript; framework=${currentContent.framework}`,
+                            mimeType: `application/vnd.mcp-ui.remote-dom`,
                             text: currentContent.script
                           })}
                           remote-dom-props={JSON.stringify({
