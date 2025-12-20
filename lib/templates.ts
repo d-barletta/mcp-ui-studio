@@ -183,17 +183,17 @@ export const templates: Template[] = [
     category: 'Forms',
     content: {
       type: 'remoteDom',
-      script: `const button = document.createElement('ui-button');
-button.setAttribute('label', 'Click me for a tool call!');
-button.addEventListener('press', () => {
+      script: `const button = document.createElement('button');
+button.textContent = 'Click me for a tool call!';
+button.addEventListener('click', () => {
   window.parent.postMessage({ type: 'tool', payload: { toolName: 'uiInteraction', params: { action: 'button-click', from: 'remote-dom' } } }, '*');
 });
 root.appendChild(button);`,
       framework: 'react'
     },
-    previewCode: `const button = document.createElement('ui-button');
-button.setAttribute('label', 'Click me!');
-button.addEventListener('press', () => {
+    previewCode: `const button = document.createElement('button');
+button.textContent = 'Click me!';
+button.addEventListener('click', () => {
   window.parent.postMessage({ 
     type: 'tool', 
     payload: { 

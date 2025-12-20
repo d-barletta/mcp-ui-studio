@@ -227,8 +227,8 @@ ${indentedScript}
             </TabsList>
           </div>
 
-          <TabsContent value="preview" className="flex-1 m-0">
-            <div className="h-full grid grid-cols-1 lg:grid-cols-2 divide-x">
+          <TabsContent value="preview" className="flex-1 min-h-0 m-0">
+            <div className="h-full min-h-0 grid grid-cols-1 lg:grid-cols-2 divide-x">
               {/* Preview Panel */}
               <div className="h-full overflow-hidden">
                 <div className="h-full p-4">
@@ -251,30 +251,44 @@ ${indentedScript}
                     />
                   )}
                   {currentContent.type === 'remoteDom' && (
-                    <div className="h-full border border-border rounded-lg bg-white p-4 overflow-auto">
-                      <UIResourceRenderer
-                        resource={{
-                          uri: 'ui://remote-component/preview',
-                          mimeType: `application/vnd.mcp-ui.remote-dom+javascript; framework=${currentContent.framework}`,
-                          text: currentContent.script
-                        }}
-                        onUIAction={async (action) => {
-                          console.log('UI Action:', action);
-                          addConsoleMessage('action', action);
-                          return { status: 'handled' };
-                        }}
-                        remoteDomProps={{
-                          library: basicComponentLibrary,
-                          remoteElements: [remoteButtonDefinition, remoteTextDefinition]
-                        }}
-                      />
+                    <div className="h-full min-h-[320px] border border-border rounded-lg bg-slate-900 text-slate-100 p-4 flex flex-col">
+                      <div className="text-xs text-slate-300 mb-4 pb-2 border-b border-slate-700 flex items-center justify-between">
+                        <span>Remote DOM Preview (framework: {currentContent.framework})</span>
+                        <span className="text-[10px] px-2 py-1 bg-green-200 text-green-800 rounded">
+                          LIVE
+                        </span>
+                      </div>
+                      <div className="flex-1 overflow-auto p-4 bg-slate-800 rounded border border-slate-700">
+                        <UIResourceRenderer
+                          key={currentContent.script}
+                          resource={{
+                            uri: 'ui://remote-component/preview',
+                            mimeType: `application/vnd.mcp-ui.remote-dom+javascript; framework=${currentContent.framework}`,
+                            text: currentContent.script
+                          }}
+                          onUIAction={async (action) => {
+                            console.log('UI Action:', action);
+                            addConsoleMessage('action', action);
+                            return { status: 'handled' };
+                          }}
+                          supportedContentTypes={['rawHtml', 'externalUrl', 'remoteDom']}
+                          htmlProps={{
+                            autoResizeIframe: true,
+                            style: { display: 'block', width: '100%', height: '100%', minHeight: '280px' }
+                          }}
+                          remoteDomProps={{
+                            library: basicComponentLibrary,
+                            remoteElements: [remoteButtonDefinition, remoteTextDefinition]
+                          }}
+                        />
+                      </div>
                     </div>
                   )}
                 </div>
               </div>
 
               {/* Right Panel with Tabs */}
-              <div className="h-full flex flex-col">
+              <div className="h-full min-h-0 flex flex-col">
                 <div className="border-b bg-muted/50">
                   <div className="flex">
                     <button
@@ -308,7 +322,7 @@ ${indentedScript}
                 </div>
 
                 {rightPanelTab === 'editor' ? (
-                  <>
+                  <div className="flex-1 min-h-0 flex flex-col">
                     <div className="p-4 border-b bg-muted/50 flex items-center justify-between">
                       <div>
                         <h3 className="font-semibold">createUIResource Options</h3>
@@ -330,9 +344,9 @@ ${indentedScript}
                         onChange={handleContentChange}
                       />
                     </div>
-                  </>
+                  </div>
                 ) : (
-                  <>
+                  <div className="flex-1 min-h-0 flex flex-col">
                     <div className="p-4 border-b bg-muted/50 flex items-center justify-between">
                       <div>
                         <h3 className="font-semibold">Console</h3>
@@ -348,7 +362,7 @@ ${indentedScript}
                         Clear
                       </Button>
                     </div>
-                    <ScrollArea className="flex-1">
+                    <div className="flex-1 min-h-0 overflow-auto">
                       <div className="p-4 font-mono text-xs space-y-2">
                         {consoleMessages.length === 0 ? (
                           <div className="text-muted-foreground text-center py-8">
@@ -383,8 +397,8 @@ ${indentedScript}
                           ))
                         )}
                       </div>
-                    </ScrollArea>
-                  </>
+                    </div>
+                  </div>
                 )}
               </div>
             </div>
