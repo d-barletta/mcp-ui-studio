@@ -1,6 +1,18 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
+
+// Add custom element type for ui-resource-renderer
+declare global {
+  namespace JSX {
+    interface IntrinsicElements {
+      'ui-resource-renderer': React.DetailedHTMLProps<React.HTMLAttributes<HTMLElement>, HTMLElement> & {
+        resource?: string;
+        'remote-dom-props'?: string;
+      };
+    }
+  }
+}
 import { Template, ContentType } from '@/lib/types';
 import { TemplateGallery } from '@/components/template-gallery';
 import { LivePreview } from '@/components/live-preview';
@@ -11,7 +23,8 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { ArrowLeft, Code, Eye, Download, AlertCircle, Terminal } from 'lucide-react';
 import { ThemeSwitcher } from '@/components/theme-switcher';
-import { UIResourceRenderer, basicComponentLibrary, remoteButtonDefinition, remoteTextDefinition } from '@mcp-ui/client';
+import { UIResourceRenderer, remoteButtonDefinition, remoteTextDefinition } from '@mcp-ui/client';
+import '@mcp-ui/client/ui-resource-renderer.wc.js';
 
 interface ConsoleMessage {
   id: number;
@@ -78,6 +91,7 @@ export default function StudioPage() {
   const [consoleMessages, setConsoleMessages] = useState<ConsoleMessage[]>([]);
   const [unreadCount, setUnreadCount] = useState(0);
   const messageIdCounter = useRef(0);
+  const rendererRef = useRef<HTMLElement>(null);
 
   const handleSelectTemplate = (template: Template) => {
     setSelectedTemplate(template);
@@ -114,6 +128,22 @@ export default function StudioPage() {
       setUnreadCount(0);
     }
   }, [rightPanelTab]);
+
+  useEffect(() => {
+    const element = rendererRef.current;
+    if (!element) return;
+
+    const handleAction = (event: any) => {
+      const action = event.detail;
+      console.log('UI Action:', action);
+      addConsoleMessage('action', action);
+    };
+
+    element.addEventListener('onUIAction', handleAction);
+    return () => {
+      element.removeEventListener('onUIAction', handleAction);
+    };
+  }); // Re-bind on every render to capture latest addConsoleMessage closure
 
   const handleContentChange = (value: string | undefined) => {
     if (!value) return;
@@ -251,23 +281,19 @@ export default function StudioPage() {
                         </span>
                       </div>
                       <div className="flex-1 overflow-auto p-4 bg-slate-800 rounded border border-slate-700">
-                        <UIResourceRenderer
+                        {/* @ts-ignore */}
+                        <ui-resource-renderer
+                          ref={rendererRef}
                           key={`${currentContent.script}-${currentContent.framework}`}
-                          resource={{
+                          resource={JSON.stringify({
                             uri: 'ui://remote-component/preview',
                             mimeType: `application/vnd.mcp-ui.remote-dom+javascript; framework=${currentContent.framework}`,
                             text: currentContent.script
-                          }}
-                          remoteDomProps={{
-                            library: basicComponentLibrary,
+                          })}
+                          remote-dom-props={JSON.stringify({
                             remoteElements: [remoteButtonDefinition, remoteTextDefinition]
-                          }}
-                          onUIAction={async (action) => {
-                            console.log('UI Action:', action);
-                            addConsoleMessage('action', action);
-                            return { status: 'handled' };
-                          }}
-                        />
+                          })}
+                        ></ui-resource-renderer>
                       </div>
                     </div>
                   )}
