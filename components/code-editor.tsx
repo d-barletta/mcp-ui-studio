@@ -2,6 +2,7 @@
 
 import dynamic from 'next/dynamic';
 import { ExportLanguage } from '@/lib/types';
+import { useEffect } from 'react';
 
 // Dynamically import Monaco to avoid SSR issues
 const MonacoEditor = dynamic(() => import('@monaco-editor/react'), {
@@ -34,6 +35,28 @@ export function CodeEditor({ code, language, onChange, readOnly = false }: CodeE
     }
   };
 
+  const handleEditorWillMount = (monaco: any) => {
+    // Completely disable all TypeScript/JavaScript diagnostics
+    monaco.languages.typescript.typescriptDefaults.setDiagnosticsOptions({
+      noSemanticValidation: true,
+      noSyntaxValidation: true,
+      noSuggestionDiagnostics: true,
+    });
+    
+    monaco.languages.typescript.javascriptDefaults.setDiagnosticsOptions({
+      noSemanticValidation: true,
+      noSyntaxValidation: true,
+      noSuggestionDiagnostics: true,
+    });
+    
+    // Disable all compiler options that might trigger diagnostics
+    monaco.languages.typescript.typescriptDefaults.setCompilerOptions({
+      allowNonTsExtensions: true,
+      noUnusedLocals: false,
+      noUnusedParameters: false,
+    });
+  };
+
   return (
     <MonacoEditor
       height="100%"
@@ -41,6 +64,7 @@ export function CodeEditor({ code, language, onChange, readOnly = false }: CodeE
       value={code}
       onChange={onChange}
       theme="vs-dark"
+      beforeMount={handleEditorWillMount}
       options={{
         readOnly,
         minimap: { enabled: false },

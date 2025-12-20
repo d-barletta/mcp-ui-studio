@@ -87,7 +87,7 @@ ${indentedScript}
       // Extract content object
       const contentMatch = normalizedValue.match(/content:\s*\{[\s\S]*?\n  \}/);
       if (!contentMatch) {
-        setContentError('Cannot find content object');
+        setContentError('Invalid MCP-UI schema: missing content object');
         return;
       }
       
@@ -109,39 +109,20 @@ ${indentedScript}
       contentStr = contentStr.replace(/iframeUrl:\s*'([^']+)'/g, '"iframeUrl": "$1"');
       contentStr = contentStr.replace(/framework:\s*'(\w+)'/g, '"framework": "$1"');
       
+      // Parse JSON - this validates JSON syntax
       const parsed = JSON.parse(contentStr);
       
-      // Validate the parsed content matches ContentType structure
-      if (!parsed.type || !['rawHtml', 'externalUrl', 'remoteDom'].includes(parsed.type)) {
-        setContentError('Invalid content type. Must be: rawHtml, externalUrl, or remoteDom');
+      // Basic MCP-UI schema validation: content must have a type property
+      if (!parsed.type) {
+        setContentError('Invalid MCP-UI schema: content.type is required');
         return;
       }
       
-      if (parsed.type === 'rawHtml' && !parsed.htmlString) {
-        setContentError('rawHtml requires htmlString property');
-        return;
-      }
-      
-      if (parsed.type === 'externalUrl' && !parsed.iframeUrl) {
-        setContentError('externalUrl requires iframeUrl property');
-        return;
-      }
-      
-      if (parsed.type === 'remoteDom') {
-        if (!parsed.script || !parsed.framework) {
-          setContentError('remoteDom requires script and framework properties');
-          return;
-        }
-        if (!['react', 'webcomponents'].includes(parsed.framework)) {
-          setContentError('framework must be: react or webcomponents');
-          return;
-        }
-      }
-      
+      // Update the content - let the preview handle rendering
       setEditedContent(parsed as ContentType);
       setContentError(null);
     } catch (error) {
-      setContentError('Invalid syntax. Check your code structure.');
+      setContentError('Invalid JSON syntax');
     }
   };
 
