@@ -14,7 +14,7 @@ import {
 } from '@/components/ui/dialog';
 
 export function ThemeSwitcher() {
-  const { theme, setTheme } = useTheme();
+  const { theme, setTheme, resolvedTheme } = useTheme();
   const [mounted, setMounted] = React.useState(false);
   const [open, setOpen] = React.useState(false);
 
@@ -52,8 +52,9 @@ export function ThemeSwitcher() {
     },
   ];
 
-  const currentTheme = themes.find((t) => t.value === theme) || themes[2];
-  const Icon = currentTheme.icon;
+  // Show the resolved theme icon (light or dark) in header, not system icon
+  const displayTheme = theme === 'system' ? resolvedTheme : theme;
+  const Icon = displayTheme === 'light' ? Sun : Moon;
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
