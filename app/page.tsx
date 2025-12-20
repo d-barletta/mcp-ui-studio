@@ -10,6 +10,7 @@ import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { ArrowLeft, Code, Eye, Download } from 'lucide-react';
+import { ThemeSwitcher } from '@/components/theme-switcher';
 
 export default function StudioPage() {
   const [selectedTemplate, setSelectedTemplate] = useState<Template | null>(null);
@@ -28,11 +29,14 @@ export default function StudioPage() {
     return (
       <main className="min-h-screen bg-background">
         <div className="container mx-auto py-8 px-4">
-          <div className="mb-8">
-            <h1 className="text-4xl font-bold mb-2">MCP UI Studio</h1>
-            <p className="text-lg text-muted-foreground">
-              Professional visual development environment for MCP-UI interfaces
-            </p>
+          <div className="mb-8 flex items-start justify-between">
+            <div>
+              <h1 className="text-4xl font-bold mb-2">MCP UI Studio</h1>
+              <p className="text-lg text-muted-foreground">
+                Professional visual development environment for MCP-UI interfaces
+              </p>
+            </div>
+            <ThemeSwitcher />
           </div>
           <TemplateGallery onSelectTemplate={handleSelectTemplate} />
         </div>
@@ -58,6 +62,7 @@ export default function StudioPage() {
           </div>
         </div>
         <div className="flex items-center gap-2">
+          <ThemeSwitcher />
           <span className="text-sm text-muted-foreground">MCP UI Studio</span>
         </div>
       </header>
