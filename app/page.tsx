@@ -122,7 +122,7 @@ ${indentedScript}
       setEditedContent(parsed as ContentType);
       setContentError(null);
     } catch (error) {
-      setContentError('Invalid JSON syntax');
+      setContentError('Invalid UI format');
     }
   };
 

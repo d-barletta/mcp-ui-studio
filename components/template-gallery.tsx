@@ -11,6 +11,22 @@ interface TemplateGalleryProps {
 export function TemplateGallery({ onSelectTemplate }: TemplateGalleryProps) {
   const categories = Array.from(new Set(templates.map(t => t.category)));
 
+  const getContentTypeBadge = (template: Template) => {
+    const { type } = template.content;
+    const badges = {
+      rawHtml: { label: 'HTML', className: 'bg-blue-500/10 text-blue-500 border-blue-500/20' },
+      externalUrl: { label: 'External URL', className: 'bg-purple-500/10 text-purple-500 border-purple-500/20' },
+      remoteDom: { label: 'Remote DOM', className: 'bg-green-500/10 text-green-500 border-green-500/20' },
+    };
+    
+    const badge = badges[type];
+    return (
+      <span className={`inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold transition-colors ${badge.className}`}>
+        {badge.label}
+      </span>
+    );
+  };
+
   return (
     <div className="space-y-8">
       <div>
@@ -33,7 +49,10 @@ export function TemplateGallery({ onSelectTemplate }: TemplateGalleryProps) {
                   onClick={() => onSelectTemplate(template)}
                 >
                   <CardHeader>
-                    <CardTitle className="text-lg">{template.name}</CardTitle>
+                    <div className="flex items-start justify-between gap-2">
+                      <CardTitle className="text-lg">{template.name}</CardTitle>
+                      {getContentTypeBadge(template)}
+                    </div>
                     <CardDescription>{template.description}</CardDescription>
                   </CardHeader>
                   <CardContent>
