@@ -92,14 +92,14 @@ export default function StudioPage() {
               </div>
 
               {/* Component JSON Panel */}
-              <div className="h-full overflow-hidden">
+              <div className="h-full flex flex-col">
                 <div className="p-4 border-b bg-muted/50">
                   <h3 className="font-semibold">MCP-UI Structure</h3>
                   <p className="text-xs text-muted-foreground mt-1">
                     Component definition in JSON format
                   </p>
                 </div>
-                <div className="h-[calc(100%-73px)]">
+                <div className="flex-1 min-h-0">
                   <CodeEditor
                     code={JSON.stringify(selectedTemplate.mcpui, null, 2)}
                     language="typescript"
@@ -111,14 +111,14 @@ export default function StudioPage() {
           </TabsContent>
 
           <TabsContent value="code" className="flex-1 m-0">
-            <div className="h-full">
+            <div className="h-full flex flex-col">
               <div className="p-4 border-b bg-muted/50">
                 <h3 className="font-semibold">Edit Component</h3>
                 <p className="text-xs text-muted-foreground mt-1">
                   Modify the MCP-UI component structure (preview only)
                 </p>
               </div>
-              <div className="h-[calc(100%-73px)]">
+              <div className="flex-1 min-h-0">
                 <CodeEditor
                   code={selectedTemplate.previewCode}
                   language="typescript"
