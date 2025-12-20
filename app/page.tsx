@@ -252,15 +252,11 @@ export default function StudioPage() {
                       </div>
                       <div className="flex-1 overflow-auto p-4 bg-slate-800 rounded border border-slate-700">
                         <UIResourceRenderer
-                          key={currentContent.script}
+                          key={`${currentContent.script}-${currentContent.framework}`}
                           resource={{
                             uri: 'ui://remote-component/preview',
-                            mimeType: 'application/vnd.mcp-ui.remote-dom',
+                            mimeType: `application/vnd.mcp-ui.remote-dom+javascript; framework=${currentContent.framework}`,
                             text: currentContent.script
-                          }}
-                          htmlProps={{
-                            autoResizeIframe: true,
-                            style: { display: 'block', width: '100%', height: '100%', minHeight: '280px' }
                           }}
                           remoteDomProps={{
                             library: basicComponentLibrary,
