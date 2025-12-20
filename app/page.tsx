@@ -65,7 +65,7 @@ export default function StudioPage() {
       {/* Main Content */}
       <div className="flex-1 overflow-hidden">
         <Tabs defaultValue="preview" className="h-full flex flex-col">
-          <div className="border-b px-4">
+          <div className="border-b p-4 bg-muted">
             <TabsList>
               <TabsTrigger value="preview">
                 <Eye className="h-4 w-4 mr-2" />
