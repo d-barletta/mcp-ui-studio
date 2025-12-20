@@ -23,10 +23,10 @@ import { CodeEditor } from '@/components/code-editor';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { ArrowLeft, Code, Eye, Download, AlertCircle, Terminal } from 'lucide-react';
+import { ArrowLeft, Code, Eye, Download, AlertCircle, Terminal, RotateCw } from 'lucide-react';
 import { ThemeSwitcher } from '@/components/theme-switcher';
 import { UIResourceRenderer, remoteButtonDefinition, remoteTextDefinition } from '@mcp-ui/client';
-import '@mcp-ui/client/ui-resource-renderer.wc.js';
+// import '@mcp-ui/client/ui-resource-renderer.wc.js'; // Loaded dynamically
 
 interface ConsoleMessage {
   id: number;
@@ -92,9 +92,16 @@ export default function StudioPage() {
   const [rightPanelTab, setRightPanelTab] = useState<'editor' | 'console'>('editor');
   const [consoleMessages, setConsoleMessages] = useState<ConsoleMessage[]>([]);
   const [unreadCount, setUnreadCount] = useState(0);
+  const [refreshKey, setRefreshKey] = useState(0);
   const messageIdCounter = useRef(0);
   const rendererRef = useRef<HTMLElement>(null);
   const consoleEndRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    // Dynamically load the web component to avoid SSR issues
+    // @ts-ignore
+    import('@mcp-ui/client/ui-resource-renderer.wc.js');
+  }, []);
 
   const handleSelectTemplate = (template: Template) => {
     setSelectedTemplate(template);
@@ -103,9 +110,16 @@ export default function StudioPage() {
     setContentError(null);
     setConsoleMessages([]);
     setUnreadCount(0);
+    setRefreshKey(0);
     messageIdCounter.current = 0;
     setRightPanelTab('editor');
     setView('studio');
+  };
+
+  const handleRefresh = () => {
+    setRefreshKey(prev => prev + 1);
+    setConsoleMessages([]);
+    setUnreadCount(0);
   };
 
   const handleBackToGallery = () => {
@@ -292,7 +306,7 @@ export default function StudioPage() {
                       <ui-resource-renderer
                         class="w-full h-full block"
                         ref={rendererRef}
-                        key={currentContent.htmlString}
+                        key={`${currentContent.htmlString}-${refreshKey}`}
                         resource={JSON.stringify({
                           uri: 'ui://preview/html',
                           mimeType: 'text/html',
@@ -309,7 +323,7 @@ export default function StudioPage() {
                       <ui-resource-renderer
                         class="w-full h-full block"
                         ref={rendererRef}
-                        key={currentContent.iframeUrl}
+                        key={`${currentContent.iframeUrl}-${refreshKey}`}
                         resource={JSON.stringify({
                           uri: 'ui://preview/url',
                           mimeType: 'text/uri-list',
@@ -333,7 +347,7 @@ export default function StudioPage() {
                         <ui-resource-renderer
                           class="w-full h-full block"
                           ref={rendererRef}
-                          key={`${currentContent.script}-${currentContent.framework}`}
+                          key={`${currentContent.script}-${currentContent.framework}-${refreshKey}`}
                           resource={JSON.stringify({
                             uri: 'ui://remote-component/preview',
                             mimeType: `application/vnd.mcp-ui.remote-dom`,
@@ -392,12 +406,23 @@ export default function StudioPage() {
                           Edit options object (live preview updates)
                         </p>
                       </div>
-                      {contentError && (
-                        <div className="flex items-center gap-2 text-destructive text-xs">
-                          <AlertCircle className="h-4 w-4" />
-                          <span>{contentError}</span>
-                        </div>
-                      )}
+                      <div className="flex items-center gap-2">
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={handleRefresh}
+                          title="Refresh Preview"
+                        >
+                          <RotateCw className="h-3 w-3 mr-2" />
+                          Refresh
+                        </Button>
+                        {contentError && (
+                          <div className="flex items-center gap-2 text-destructive text-xs">
+                            <AlertCircle className="h-4 w-4" />
+                            <span>{contentError}</span>
+                          </div>
+                        )}
+                      </div>
                     </div>
                     <div className="flex-1 min-h-0 overflow-hidden">
                       <CodeEditor
