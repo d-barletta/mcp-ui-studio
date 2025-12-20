@@ -20,9 +20,58 @@ interface ConsoleMessage {
   data: any;
 }
 
+const generateEditorCode = (content: ContentType): string => {
+  let contentStr: string;
+  
+  if (content.type === 'rawHtml') {
+    // Format HTML with template literals
+    const htmlLines = content.htmlString.split('\n');
+    const indentedHtml = htmlLines.map((line, i) => {
+      if (i === 0 && line.trim() === '') return '';
+      if (i === htmlLines.length - 1 && line.trim() === '') return '    ';
+      return '      ' + line;
+    }).join('\n');
+    
+    contentStr = `{ 
+    type: 'rawHtml', 
+    htmlString: \`
+${indentedHtml}
+    \` 
+  }`;
+  } else if (content.type === 'externalUrl') {
+    contentStr = `{ 
+    type: 'externalUrl', 
+    iframeUrl: '${content.iframeUrl}' 
+  }`;
+  } else {
+    // Remote DOM
+    const scriptLines = content.script.split('\n');
+    const indentedScript = scriptLines.map((line, i) => {
+      if (i === 0 && line.trim() === '') return '';
+      if (i === scriptLines.length - 1 && line.trim() === '') return '    ';
+      return '      ' + line;
+    }).join('\n');
+    
+    contentStr = `{ 
+    type: 'remoteDom', 
+    script: \`
+${indentedScript}
+    \`,
+    framework: '${content.framework}'
+  }`;
+  }
+
+  return `{
+  uri: 'ui://my-component/instance-1',
+  content: ${contentStr},
+  encoding: 'text',
+}`;
+};
+
 export default function StudioPage() {
   const [selectedTemplate, setSelectedTemplate] = useState<Template | null>(null);
   const [editedContent, setEditedContent] = useState<ContentType | null>(null);
+  const [editorCode, setEditorCode] = useState<string>('');
   const [contentError, setContentError] = useState<string | null>(null);
   const [view, setView] = useState<'gallery' | 'studio'>('gallery');
   const [rightPanelTab, setRightPanelTab] = useState<'editor' | 'console'>('editor');
@@ -33,6 +82,7 @@ export default function StudioPage() {
   const handleSelectTemplate = (template: Template) => {
     setSelectedTemplate(template);
     setEditedContent(template.content);
+    setEditorCode(generateEditorCode(template.content));
     setContentError(null);
     setConsoleMessages([]);
     setUnreadCount(0);
@@ -65,97 +115,39 @@ export default function StudioPage() {
     }
   }, [rightPanelTab]);
 
-  const generateEditorCode = (content: ContentType): string => {
-    let contentStr: string;
-    
-    if (content.type === 'rawHtml') {
-      // Format HTML with template literals
-      const htmlLines = content.htmlString.split('\n');
-      const indentedHtml = htmlLines.map((line, i) => {
-        if (i === 0 && line.trim() === '') return '';
-        if (i === htmlLines.length - 1 && line.trim() === '') return '    ';
-        return '      ' + line;
-      }).join('\n');
-      
-      contentStr = `{ 
-    type: 'rawHtml', 
-    htmlString: \`
-${indentedHtml}
-    \` 
-  }`;
-    } else if (content.type === 'externalUrl') {
-      contentStr = `{ 
-    type: 'externalUrl', 
-    iframeUrl: '${content.iframeUrl}' 
-  }`;
-    } else {
-      // Remote DOM
-      const scriptLines = content.script.split('\n');
-      const indentedScript = scriptLines.map((line, i) => {
-        if (i === 0 && line.trim() === '') return '';
-        if (i === scriptLines.length - 1 && line.trim() === '') return '    ';
-        return '      ' + line;
-      }).join('\n');
-      
-      contentStr = `{ 
-    type: 'remoteDom', 
-    script: \`
-${indentedScript}
-    \`,
-    framework: '${content.framework}'
-  }`;
-    }
-
-    return `{
-  uri: 'ui://my-component/instance-1',
-  content: ${contentStr},
-  encoding: 'text',
-}`;
-  };
-
   const handleContentChange = (value: string | undefined) => {
     if (!value) return;
+    setEditorCode(value);
     
     try {
-      // Convert template literals to JSON strings for parsing
-      let normalizedValue = value;
+      // Use Function constructor to parse the JS object literal safely
+      // This handles comments, trailing commas, different quoting styles, etc.
+      const parseConfig = new Function(`return ${value}`);
+      const parsedConfig = parseConfig();
       
-      // Extract content object
-      const contentMatch = normalizedValue.match(/content:\s*\{[\s\S]*?\n  \}/);
-      if (!contentMatch) {
+      if (!parsedConfig || !parsedConfig.content) {
         setContentError('Invalid MCP-UI schema: missing content object');
         return;
       }
       
-      let contentStr = contentMatch[0].replace(/content:\s*/, '');
+      const content = parsedConfig.content;
       
-      // Replace template literals with JSON strings (using [\s\S] to match any character including newlines)
-      contentStr = contentStr.replace(/htmlString:\s*`([\s\S]*?)`/g, (_, html) => {
-        const trimmedHtml = html.trim();
-        return `"htmlString": ${JSON.stringify(trimmedHtml)}`;
-      });
-      
-      contentStr = contentStr.replace(/script:\s*`([\s\S]*?)`/g, (_, script) => {
-        const trimmedScript = script.trim();
-        return `"script": ${JSON.stringify(trimmedScript)}`;
-      });
-      
-      // Replace single quotes with double quotes for JSON
-      contentStr = contentStr.replace(/type:\s*'(\w+)'/g, '"type": "$1"');
-      contentStr = contentStr.replace(/iframeUrl:\s*'([^']+)'/g, '"iframeUrl": "$1"');
-      contentStr = contentStr.replace(/framework:\s*'(\w+)'/g, '"framework": "$1"');
-      
-      // Parse JSON - this validates JSON syntax
-      const parsed = JSON.parse(contentStr);
-      
-      // Basic MCP-UI schema validation: content must have a type property
-      if (!parsed.type) {
+      // Basic MCP-UI schema validation
+      if (!content.type) {
         setContentError('Invalid MCP-UI schema: content.type is required');
         return;
       }
+
+      // Trim strings to match previous behavior and avoid excessive whitespace
+      if (typeof content.htmlString === 'string') {
+        content.htmlString = content.htmlString.trim();
+      }
+      if (typeof content.script === 'string') {
+        content.script = content.script.trim();
+      }
       
       // Update the content - let the preview handle rendering
-      setEditedContent(parsed as ContentType);
+      setEditedContent(content as ContentType);
       setContentError(null);
     } catch (error) {
       setContentError('Invalid UI format');
@@ -263,15 +255,9 @@ ${indentedScript}
                           key={currentContent.script}
                           resource={{
                             uri: 'ui://remote-component/preview',
-                            mimeType: `application/vnd.mcp-ui.remote-dom+javascript; framework=${currentContent.framework}`,
+                            mimeType: 'application/vnd.mcp-ui.remote-dom',
                             text: currentContent.script
                           }}
-                          onUIAction={async (action) => {
-                            console.log('UI Action:', action);
-                            addConsoleMessage('action', action);
-                            return { status: 'handled' };
-                          }}
-                          supportedContentTypes={['rawHtml', 'externalUrl', 'remoteDom']}
                           htmlProps={{
                             autoResizeIframe: true,
                             style: { display: 'block', width: '100%', height: '100%', minHeight: '280px' }
@@ -279,6 +265,11 @@ ${indentedScript}
                           remoteDomProps={{
                             library: basicComponentLibrary,
                             remoteElements: [remoteButtonDefinition, remoteTextDefinition]
+                          }}
+                          onUIAction={async (action) => {
+                            console.log('UI Action:', action);
+                            addConsoleMessage('action', action);
+                            return { status: 'handled' };
                           }}
                         />
                       </div>
@@ -339,7 +330,7 @@ ${indentedScript}
                     </div>
                     <div className="flex-1 min-h-0 overflow-hidden">
                       <CodeEditor
-                        code={generateEditorCode(currentContent)}
+                        code={editorCode}
                         language="typescript"
                         onChange={handleContentChange}
                       />
@@ -422,7 +413,7 @@ ${indentedScript}
               </div>
               <div className="flex-1 min-h-0">
                 <CodeEditor
-                  code={generateEditorCode(currentContent)}
+                  code={editorCode}
                   language="typescript"
                   onChange={handleContentChange}
                 />

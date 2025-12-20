@@ -3,7 +3,7 @@ export interface UIResource {
   type: 'resource';
   resource: {
     uri: string;
-    mimeType: 'text/html' | 'text/uri-list' | 'application/vnd.mcp-ui.remote-dom+javascript';
+    mimeType: 'text/html' | 'text/uri-list' | 'application/vnd.mcp-ui.remote-dom';
     text?: string;
     blob?: string;
   };
