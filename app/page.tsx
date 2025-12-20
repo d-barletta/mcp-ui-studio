@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Template, ContentType } from '@/lib/types';
 import { TemplateGallery } from '@/components/template-gallery';
 import { LivePreview } from '@/components/live-preview';
@@ -9,25 +9,61 @@ import { CodeEditor } from '@/components/code-editor';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { ArrowLeft, Code, Eye, Download, AlertCircle } from 'lucide-react';
+import { ArrowLeft, Code, Eye, Download, AlertCircle, Terminal } from 'lucide-react';
 import { ThemeSwitcher } from '@/components/theme-switcher';
+import { UIResourceRenderer, basicComponentLibrary, remoteButtonDefinition, remoteTextDefinition } from '@mcp-ui/client';
+
+interface ConsoleMessage {
+  id: number;
+  timestamp: Date;
+  type: 'action' | 'error' | 'info';
+  data: any;
+}
 
 export default function StudioPage() {
   const [selectedTemplate, setSelectedTemplate] = useState<Template | null>(null);
   const [editedContent, setEditedContent] = useState<ContentType | null>(null);
   const [contentError, setContentError] = useState<string | null>(null);
   const [view, setView] = useState<'gallery' | 'studio'>('gallery');
+  const [rightPanelTab, setRightPanelTab] = useState<'editor' | 'console'>('editor');
+  const [consoleMessages, setConsoleMessages] = useState<ConsoleMessage[]>([]);
+  const [unreadCount, setUnreadCount] = useState(0);
+  const messageIdCounter = useRef(0);
 
   const handleSelectTemplate = (template: Template) => {
     setSelectedTemplate(template);
     setEditedContent(template.content);
     setContentError(null);
+    setConsoleMessages([]);
+    setUnreadCount(0);
+    messageIdCounter.current = 0;
+    setRightPanelTab('editor');
     setView('studio');
   };
 
   const handleBackToGallery = () => {
     setView('gallery');
   };
+
+  const addConsoleMessage = (type: ConsoleMessage['type'], data: any) => {
+    messageIdCounter.current += 1;
+    const message: ConsoleMessage = {
+      id: messageIdCounter.current,
+      timestamp: new Date(),
+      type,
+      data
+    };
+    setConsoleMessages(prev => [...prev, message]);
+    if (rightPanelTab === 'editor') {
+      setUnreadCount(prev => prev + 1);
+    }
+  };
+
+  useEffect(() => {
+    if (rightPanelTab === 'console') {
+      setUnreadCount(0);
+    }
+  }, [rightPanelTab]);
 
   const generateEditorCode = (content: ContentType): string => {
     let contentStr: string;
@@ -93,13 +129,13 @@ ${indentedScript}
       
       let contentStr = contentMatch[0].replace(/content:\s*/, '');
       
-      // Replace template literals with JSON strings
-      contentStr = contentStr.replace(/htmlString:\s*`([^`]*)`/s, (_, html) => {
+      // Replace template literals with JSON strings (using [\s\S] to match any character including newlines)
+      contentStr = contentStr.replace(/htmlString:\s*`([\s\S]*?)`/g, (_, html) => {
         const trimmedHtml = html.trim();
         return `"htmlString": ${JSON.stringify(trimmedHtml)}`;
       });
       
-      contentStr = contentStr.replace(/script:\s*`([^`]*)`/s, (_, script) => {
+      contentStr = contentStr.replace(/script:\s*`([\s\S]*?)`/g, (_, script) => {
         const trimmedScript = script.trim();
         return `"script": ${JSON.stringify(trimmedScript)}`;
       });
@@ -215,41 +251,141 @@ ${indentedScript}
                     />
                   )}
                   {currentContent.type === 'remoteDom' && (
-                    <div className="flex items-center justify-center h-full border border-border rounded-lg bg-muted/20">
-                      <div className="text-center text-muted-foreground p-8">
-                        <Code className="h-12 w-12 mx-auto mb-4 opacity-50" />
-                        <p className="font-semibold mb-2">Remote DOM Component</p>
-                        <p className="text-sm">Framework: {currentContent.framework}</p>
-                        <p className="text-xs mt-4">Preview requires @mcp-ui/client renderer</p>
-                      </div>
+                    <div className="h-full border border-border rounded-lg bg-white p-4 overflow-auto">
+                      <UIResourceRenderer
+                        resource={{
+                          uri: 'ui://remote-component/preview',
+                          mimeType: `application/vnd.mcp-ui.remote-dom+javascript; framework=${currentContent.framework}`,
+                          text: currentContent.script
+                        }}
+                        onUIAction={async (action) => {
+                          console.log('UI Action:', action);
+                          addConsoleMessage('action', action);
+                          return { status: 'handled' };
+                        }}
+                        remoteDomProps={{
+                          library: basicComponentLibrary,
+                          remoteElements: [remoteButtonDefinition, remoteTextDefinition]
+                        }}
+                      />
                     </div>
                   )}
                 </div>
               </div>
 
-              {/* Content Code Panel */}
+              {/* Right Panel with Tabs */}
               <div className="h-full flex flex-col">
-                <div className="p-4 border-b bg-muted/50 flex items-center justify-between">
-                  <div>
-                    <h3 className="font-semibold">createUIResource Options</h3>
-                    <p className="text-xs text-muted-foreground mt-1">
-                      Edit options object (live preview updates)
-                    </p>
+                <div className="border-b bg-muted/50">
+                  <div className="flex">
+                    <button
+                      onClick={() => setRightPanelTab('editor')}
+                      className={`flex-1 px-4 py-3 text-sm font-medium transition-colors ${
+                        rightPanelTab === 'editor'
+                          ? 'bg-background border-b-2 border-primary text-foreground'
+                          : 'text-muted-foreground hover:text-foreground'
+                      }`}
+                    >
+                      <Code className="h-4 w-4 inline-block mr-2" />
+                      Editor
+                    </button>
+                    <button
+                      onClick={() => setRightPanelTab('console')}
+                      className={`flex-1 px-4 py-3 text-sm font-medium transition-colors relative ${
+                        rightPanelTab === 'console'
+                          ? 'bg-background border-b-2 border-primary text-foreground'
+                          : 'text-muted-foreground hover:text-foreground'
+                      }`}
+                    >
+                      <Terminal className="h-4 w-4 inline-block mr-2" />
+                      Console
+                      {unreadCount > 0 && rightPanelTab === 'editor' && (
+                        <span className="ml-2 inline-flex items-center justify-center h-5 w-5 text-xs font-bold text-white bg-red-500 rounded-full">
+                          {unreadCount}
+                        </span>
+                      )}
+                    </button>
                   </div>
-                  {contentError && (
-                    <div className="flex items-center gap-2 text-destructive text-xs">
-                      <AlertCircle className="h-4 w-4" />
-                      <span>{contentError}</span>
+                </div>
+
+                {rightPanelTab === 'editor' ? (
+                  <>
+                    <div className="p-4 border-b bg-muted/50 flex items-center justify-between">
+                      <div>
+                        <h3 className="font-semibold">createUIResource Options</h3>
+                        <p className="text-xs text-muted-foreground mt-1">
+                          Edit options object (live preview updates)
+                        </p>
+                      </div>
+                      {contentError && (
+                        <div className="flex items-center gap-2 text-destructive text-xs">
+                          <AlertCircle className="h-4 w-4" />
+                          <span>{contentError}</span>
+                        </div>
+                      )}
                     </div>
-                  )}
-                </div>
-                <div className="flex-1 min-h-0">
-                  <CodeEditor
-                    code={generateEditorCode(currentContent)}
-                    language="typescript"
-                    onChange={handleContentChange}
-                  />
-                </div>
+                    <div className="flex-1 min-h-0 overflow-hidden">
+                      <CodeEditor
+                        code={generateEditorCode(currentContent)}
+                        language="typescript"
+                        onChange={handleContentChange}
+                      />
+                    </div>
+                  </>
+                ) : (
+                  <>
+                    <div className="p-4 border-b bg-muted/50 flex items-center justify-between">
+                      <div>
+                        <h3 className="font-semibold">Console</h3>
+                        <p className="text-xs text-muted-foreground mt-1">
+                          UI actions and events log
+                        </p>
+                      </div>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => setConsoleMessages([])}
+                      >
+                        Clear
+                      </Button>
+                    </div>
+                    <ScrollArea className="flex-1">
+                      <div className="p-4 font-mono text-xs space-y-2">
+                        {consoleMessages.length === 0 ? (
+                          <div className="text-muted-foreground text-center py-8">
+                            No messages yet. Interact with the preview to see logs.
+                          </div>
+                        ) : (
+                          consoleMessages.map((msg) => (
+                            <div
+                              key={msg.id}
+                              className="border-b border-border pb-2 last:border-0"
+                            >
+                              <div className="flex items-center gap-2 mb-1">
+                                <span className="text-muted-foreground">
+                                  {msg.timestamp.toLocaleTimeString()}
+                                </span>
+                                <span
+                                  className={`px-2 py-0.5 rounded text-xs font-semibold ${
+                                    msg.type === 'action'
+                                      ? 'bg-blue-500/10 text-blue-500'
+                                      : msg.type === 'error'
+                                      ? 'bg-red-500/10 text-red-500'
+                                      : 'bg-gray-500/10 text-gray-500'
+                                  }`}
+                                >
+                                  {msg.type}
+                                </span>
+                              </div>
+                              <pre className="whitespace-pre-wrap break-all text-foreground">
+                                {JSON.stringify(msg.data, null, 2)}
+                              </pre>
+                            </div>
+                          ))
+                        )}
+                      </div>
+                    </ScrollArea>
+                  </>
+                )}
               </div>
             </div>
           </TabsContent>
@@ -292,3 +428,4 @@ ${indentedScript}
     </main>
   );
 }
+

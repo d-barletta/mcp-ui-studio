@@ -175,5 +175,33 @@ export const templates: Template[] = [
   <label><input type="checkbox"> Remember me</label>
   <button type="submit">Sign In</button>
 </form>`
+  },
+  {
+    id: 'remote-dom-button',
+    name: 'Remote DOM Button',
+    description: 'Interactive button using Remote DOM with host component library',
+    category: 'Forms',
+    content: {
+      type: 'remoteDom',
+      script: `const button = document.createElement('ui-button');
+button.setAttribute('label', 'Click me for a tool call!');
+button.addEventListener('press', () => {
+  window.parent.postMessage({ type: 'tool', payload: { toolName: 'uiInteraction', params: { action: 'button-click', from: 'remote-dom' } } }, '*');
+});
+root.appendChild(button);`,
+      framework: 'react'
+    },
+    previewCode: `const button = document.createElement('ui-button');
+button.setAttribute('label', 'Click me!');
+button.addEventListener('press', () => {
+  window.parent.postMessage({ 
+    type: 'tool', 
+    payload: { 
+      toolName: 'uiInteraction', 
+      params: { action: 'button-click' } 
+    } 
+  }, '*');
+});
+root.appendChild(button);`
   }
 ];
