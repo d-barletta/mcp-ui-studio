@@ -25,6 +25,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { ArrowLeft, Code, Eye, Download, AlertCircle, Terminal, RotateCw } from 'lucide-react';
 import { ThemeSwitcher } from '@/components/theme-switcher';
+import { Logo } from '@/components/logo';
 import { UIResourceRenderer, remoteButtonDefinition, remoteTextDefinition } from '@mcp-ui/client';
 // import '@mcp-ui/client/ui-resource-renderer.wc.js'; // Loaded dynamically
 
@@ -237,7 +238,10 @@ export default function StudioPage() {
         <div className="container mx-auto py-8 px-4">
           <div className="mb-8 flex items-start justify-between">
             <div>
-              <h1 className="text-4xl font-bold mb-2">MCP UI Studio</h1>
+              <div className="flex items-center gap-3 mb-2">
+                <Logo className="h-10 w-10" />
+                <h1 className="text-4xl font-bold">MCP UI Studio</h1>
+              </div>
               <p className="text-lg text-muted-foreground">
                 Visual development environment for MCP-UI interfaces
               </p>
@@ -272,7 +276,10 @@ export default function StudioPage() {
         </div>
         <div className="flex items-center gap-2">
           <ThemeSwitcher />
-          <span className="text-sm text-muted-foreground">MCP UI Studio</span>
+          <div className="flex items-center gap-2 text-muted-foreground">
+            <Logo className="h-4 w-4" />
+            <span className="text-sm">MCP UI Studio</span>
+          </div>
         </div>
       </header>
 
