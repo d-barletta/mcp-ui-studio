@@ -92,6 +92,7 @@ export default function StudioPage() {
   const [unreadCount, setUnreadCount] = useState(0);
   const messageIdCounter = useRef(0);
   const rendererRef = useRef<HTMLElement>(null);
+  const consoleEndRef = useRef<HTMLDivElement>(null);
 
   const handleSelectTemplate = (template: Template) => {
     setSelectedTemplate(template);
@@ -148,6 +149,12 @@ export default function StudioPage() {
     };
   }); // Re-bind on every render to capture latest addConsoleMessage closure
 
+  useEffect(() => {
+    if (rightPanelTab === 'console') {
+      consoleEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+    }
+  }, [consoleMessages, rightPanelTab]);
+
   const handleContentChange = (value: string | undefined) => {
     if (!value) return;
     setEditorCode(value);
@@ -182,6 +189,8 @@ export default function StudioPage() {
       // Update the content - let the preview handle rendering
       setEditedContent(content as ContentType);
       setContentError(null);
+      setConsoleMessages([]); // Clear console on content update
+      setUnreadCount(0);
     } catch (error) {
       setContentError('Invalid UI format');
     }
@@ -412,6 +421,7 @@ export default function StudioPage() {
                             </div>
                           ))
                         )}
+                        <div ref={consoleEndRef} />
                       </div>
                     </div>
                   </div>
