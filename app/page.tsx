@@ -273,14 +273,14 @@ export default function StudioPage() {
                     />
                   )}
                   {currentContent.type === 'remoteDom' && (
-                    <div className="h-full min-h-[320px] border border-border rounded-lg bg-slate-900 text-slate-100 p-4 flex flex-col">
-                      <div className="text-xs text-slate-300 mb-4 pb-2 border-b border-slate-700 flex items-center justify-between">
-                        <span>Remote DOM Preview (framework: {currentContent.framework})</span>
+                    <div className="h-full min-h-[320px] border border-border rounded-lg text-slate-100 p-4 flex flex-col">
+                      <div className="text-xs text-slate-300 mb-4 pb-2 border-b flex items-center justify-between">
+                        <span>Remote DOM Preview</span>
                         <span className="text-[10px] px-2 py-1 bg-green-200 text-green-800 rounded">
                           LIVE
                         </span>
                       </div>
-                      <div className="flex-1 overflow-auto p-4 bg-slate-800 rounded border border-slate-700">
+                      <div className="flex-1 overflow-auto p-4 rounded border">
                         {/* @ts-ignore */}
                         <ui-resource-renderer
                           ref={rendererRef}
