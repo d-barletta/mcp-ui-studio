@@ -1,48 +1,54 @@
 # MCP UI Studio
 
-*Visual development environment for MCP-UI interfaces*
+Visual development environment for MCP-UI interfaces
 
-[**Live Demo**](https://d-barletta.github.io/mcp-ui-studio) 
+🚀 [**Live Demo**](https://d-barletta.github.io/mcp-ui-studio)
 
 Build production-ready MCP-UI handlers visually, test interactively, and export instantly.
-
-
 
 ## Features
 
 ### 🎨 Template Gallery
+
 Browse and select from **pre-built component templates** including:
+
 - **Forms**: Contact forms, login forms
 - **Tables**: Interactive data tables with sorting and filtering
 - **Cards**: Card galleries with images and actions
 - **Charts**: Analytics charts and metrics
 
-
 ### 👁️ Live Sandboxed Preview
+
 - Real-time component rendering
 - Interactive testing environment
 - Split-pane view with preview and code
 - Responsive layout testing
 
 ### 💻 Monaco Editor Integration
+
 - Professional code editing experience
 - Syntax highlighting for TypeScript, Python, and Ruby
 - Code structure visualization
 - JSON schema validation
 
 ### 🚀 Multi-Language Export
+
 Export your MCP-UI components in three languages:
+
 - **TypeScript**: For Node.js and Deno MCP servers
 - **Python**: For Python-based MCP servers
 - **Ruby**: For Ruby-based MCP servers
 
 ### 🌉 Framework Bridge
+
 Convert between different UI frameworks:
+
 - Shadcn UI → MCP-UI conversion (coming soon)
 - Component structure transformation
 - Props mapping and translation
 
 ### 🎯 Visual Component Builder
+
 - Component tree structure
 - Property editor panel
 - Component palette with MCP-UI widgets
@@ -61,7 +67,7 @@ Convert between different UI frameworks:
 
 ### Prerequisites
 
-- Node.js 18+ 
+- Node.js 18+
 - npm or yarn
 
 ### Installation
@@ -93,94 +99,32 @@ npm start
 ## Usage
 
 ### 1. Browse Templates
+
 Start by exploring the template gallery on the home page. Click any template card to open it in the studio.
 
 ### 2. View Live Preview
+
 See your component rendered in real-time with interactive controls. The preview updates instantly as you make changes.
 
 ### 3. Edit Component Structure
+
 Switch to the Code Editor tab to modify the MCP-UI component structure using the integrated Monaco editor.
 
 ### 4. Export Code
+
 Navigate to the Export tab to:
+
 - Choose your target language (TypeScript, Python, or Ruby)
 - Copy the generated code
 - Download the handler file
 
 ### 5. Integrate with Your MCP Server
+
 Take the exported code and integrate it directly into your MCP server implementation.
-
-## Component Structure
-
-MCP-UI components follow a simple JSON structure:
-
-```json
-{
-  "type": "form",
-  "props": {
-    "title": "Contact Us",
-    "description": "Get in touch"
-  },
-  "children": [
-    {
-      "type": "input",
-      "props": {
-        "label": "Name",
-        "placeholder": "John Doe"
-      }
-    }
-  ]
-}
-```
 
 ## Development
 
-### Project Structure
-
-```
-mcp-ui-studio/
-├── app/                    # Next.js app directory
-│   ├── page.tsx           # Main studio page
-│   ├── layout.tsx         # Root layout
-│   └── globals.css        # Global styles
-├── components/            # React components
-│   ├── ui/               # shadcn/ui components
-│   ├── template-gallery.tsx
-│   ├── live-preview.tsx
-│   ├── code-editor.tsx
-│   └── export-panel.tsx
-├── lib/                   # Utilities and data
-│   ├── types.ts          # TypeScript types
-│   ├── templates.ts      # Template definitions
-│   ├── export.ts         # Code generation
-│   └── utils.ts          # Helper functions
-└── public/               # Static assets
-```
-
-### Adding New Templates
-
-1. Add your template definition to `lib/templates.ts`:
-
-```typescript
-{
-  id: 'my-template',
-  name: 'My Template',
-  description: 'Description of template',
-  category: 'Category',
-  mcpui: {
-    type: 'container',
-    props: { /* props */ },
-    children: [ /* children */ ]
-  },
-  previewCode: '/* JSON string */'
-}
-```
-
-2. The template will automatically appear in the gallery.
-
-### Extending the Live Preview
-
-Add support for new component types in `components/live-preview.tsx` by adding a new case to the switch statement in the `renderComponent` function.
+- Very initial phase for now
 
 ## Roadmap
 
