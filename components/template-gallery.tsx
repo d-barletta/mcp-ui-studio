@@ -16,7 +16,7 @@ export function TemplateGallery({ onSelectTemplate }: TemplateGalleryProps) {
       <div>
         <h2 className="text-3xl font-bold tracking-tight">Template Gallery</h2>
         <p className="text-muted-foreground mt-2">
-          Choose from 8+ pre-built MCP-UI components to get started
+          Choose from pre-built MCP-UI components to get started
         </p>
       </div>
 

@@ -42,15 +42,27 @@ export function createUIResource(options: CreateUIResourceOptions): UIResource {
 }
 
 export function generateTypeScriptExport(content: ContentType, encoding: Encoding = 'text'): string {
-  const contentStr = JSON.stringify(content, null, 2)
-    .replace(/"type": "rawHtml"/g, "type: 'rawHtml'")
-    .replace(/"type": "externalUrl"/g, "type: 'externalUrl'")
-    .replace(/"type": "remoteDom"/g, "type: 'remoteDom'")
-    .replace(/"htmlString":/g, 'htmlString:')
-    .replace(/"iframeUrl":/g, 'iframeUrl:')
-    .replace(/"script":/g, 'script:')
-    .replace(/"framework": "react"/g, "framework: 'react'")
-    .replace(/"framework": "webcomponents"/g, "framework: 'webcomponents'");
+  let contentStr: string;
+  
+  if (content.type === 'rawHtml') {
+    // Use template literal for HTML
+    contentStr = `{
+    type: 'rawHtml',
+    htmlString: \`${content.htmlString}\`
+  }`;
+  } else if (content.type === 'externalUrl') {
+    contentStr = `{
+    type: 'externalUrl',
+    iframeUrl: '${content.iframeUrl}'
+  }`;
+  } else {
+    // remoteDom - use template literal for script
+    contentStr = `{
+    type: 'remoteDom',
+    script: \`${content.script}\`,
+    framework: '${content.framework}'
+  }`;
+  }
 
   return `// MCP-UI Handler - TypeScript
 import { createUIResource } from '@mcp-ui/server';
