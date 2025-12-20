@@ -134,7 +134,7 @@ ${indentedScript}
             <div>
               <h1 className="text-4xl font-bold mb-2">MCP UI Studio</h1>
               <p className="text-lg text-muted-foreground">
-                Professional visual development environment for MCP-UI interfaces
+                Visual development environment for MCP-UI interfaces
               </p>
             </div>
             <ThemeSwitcher />

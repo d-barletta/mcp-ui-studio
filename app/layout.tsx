@@ -16,7 +16,7 @@ const geistMono = localFont({
 
 export const metadata: Metadata = {
   title: "MCP UI Studio",
-  description: "Professional visual development environment for MCP-UI interfaces",
+  description: "Visual development environment for MCP-UI interfaces",
 };
 
 export default function RootLayout({
