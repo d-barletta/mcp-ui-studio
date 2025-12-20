@@ -5,6 +5,8 @@ import { Template } from '@/lib/types';
 import { TemplateGallery } from '@/components/template-gallery';
 import { ThemeSwitcher } from '@/components/theme-switcher';
 import { Logo } from '@/components/logo';
+import { Github } from 'lucide-react';
+import { Button } from '@/components/ui/button';
 
 export default function GalleryPage() {
   const router = useRouter();
@@ -26,7 +28,23 @@ export default function GalleryPage() {
               Visual development environment for MCP-UI interfaces
             </p>
           </div>
-          <ThemeSwitcher />
+          <div className="flex items-center gap-2">
+            <Button 
+              variant="ghost" 
+              size="icon"
+              asChild
+            >
+              <a 
+                href="https://github.com/d-barletta/mcp-ui-studio" 
+                target="_blank" 
+                rel="noopener noreferrer"
+                aria-label="View on GitHub"
+              >
+                <Github className="h-5 w-5" />
+              </a>
+            </Button>
+            <ThemeSwitcher />
+          </div>
         </div>
         <TemplateGallery onSelectTemplate={handleSelectTemplate} />
       </div>

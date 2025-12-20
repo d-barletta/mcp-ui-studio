@@ -24,7 +24,7 @@ import { VisualEditor } from '@/components/visual-editor';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { ArrowLeft, Code, Eye, Download, AlertCircle, Terminal, RotateCw, Palette } from 'lucide-react';
+import { ArrowLeft, Code, Eye, Download, AlertCircle, Terminal, RotateCw, Palette, Github } from 'lucide-react';
 import { ThemeSwitcher } from '@/components/theme-switcher';
 import { Logo } from '@/components/logo';
 import { UIResourceRenderer, remoteButtonDefinition, remoteTextDefinition } from '@mcp-ui/client';
@@ -263,6 +263,20 @@ export default function StudioClient() {
           </div>
         </div>
         <div className="flex items-center gap-2">
+          <Button 
+            variant="ghost" 
+            size="icon"
+            asChild
+          >
+            <a 
+              href="https://github.com/d-barletta/mcp-ui-studio" 
+              target="_blank" 
+              rel="noopener noreferrer"
+              aria-label="View on GitHub"
+            >
+              <Github className="h-4 w-4" />
+            </a>
+          </Button>
           <ThemeSwitcher />
           <div className="flex items-center gap-2 text-muted-foreground">
             <Logo className="h-4 w-4" />
