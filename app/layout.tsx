@@ -37,6 +37,9 @@ export default function RootLayout({
         >
           {children}
         </ThemeProvider>
+        <div id='stars' />
+        <div id='stars2' />
+        <div id='stars3' />
       </body>
     </html>
   );

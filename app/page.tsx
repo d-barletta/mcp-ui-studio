@@ -343,7 +343,7 @@ export default function StudioPage() {
                           LIVE
                         </span>
                       </div>
-                      <div className="flex-1 overflow-auto p-4 rounded border">
+                      <div className="flex-1 overflow-auto rounded border">
                         <ui-resource-renderer
                           class="w-full h-full block"
                           ref={rendererRef}
