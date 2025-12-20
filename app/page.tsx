@@ -150,6 +150,25 @@ export default function StudioPage() {
   }); // Re-bind on every render to capture latest addConsoleMessage closure
 
   useEffect(() => {
+    const handleMessage = (event: MessageEvent) => {
+      // Filter out react-devtools and webpack messages
+      if (event.data?.source?.startsWith('react-devtools')) return;
+      if (event.data?.type?.startsWith('webpack')) return;
+
+      // Capture tool calls and intents from iframes
+      if (event.data && (event.data.type === 'tool' || event.data.type === 'intent')) {
+        console.log('Iframe Message:', event.data);
+        addConsoleMessage('action', event.data);
+      }
+    };
+
+    window.addEventListener('message', handleMessage);
+    return () => {
+      window.removeEventListener('message', handleMessage);
+    };
+  });
+
+  useEffect(() => {
     if (rightPanelTab === 'console') {
       consoleEndRef.current?.scrollIntoView({ behavior: 'smooth' });
     }
