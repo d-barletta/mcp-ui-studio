@@ -114,7 +114,7 @@ export default function StudioPage() {
         setEditedContent(template.content);
         setEditorCode(generateEditorCode(template.content));
       } else {
-        // Handle template not found
+        // Handle template not found 404
         router.push('/');
       }
     }
