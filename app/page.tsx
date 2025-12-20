@@ -135,6 +135,9 @@ export default function StudioPage() {
 
     const handleAction = (event: any) => {
       const action = event.detail;
+      // Filter out internal messages (arrays)
+      if (Array.isArray(action)) return;
+
       console.log('UI Action:', action);
       addConsoleMessage('action', action);
     };
