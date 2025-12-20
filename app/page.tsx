@@ -9,6 +9,8 @@ declare global {
       'ui-resource-renderer': React.DetailedHTMLProps<React.HTMLAttributes<HTMLElement>, HTMLElement> & {
         resource?: string;
         'remote-dom-props'?: string;
+        'html-props'?: string;
+        class?: string;
       };
     }
   }
@@ -286,22 +288,38 @@ export default function StudioPage() {
               <div className="h-full overflow-hidden">
                 <div className="h-full p-4">
                   {currentContent.type === 'rawHtml' && (
-                    <iframe
-                      key={currentContent.htmlString}
-                      srcDoc={currentContent.htmlString}
-                      className="w-full h-full border border-border rounded-lg bg-white"
-                      sandbox="allow-scripts allow-forms allow-same-origin allow-modals allow-popups"
-                      title="MCP-UI Preview"
-                    />
+                    <div className="w-full h-full border border-border rounded-lg bg-white overflow-auto">
+                      <ui-resource-renderer
+                        class="w-full h-full block"
+                        ref={rendererRef}
+                        key={currentContent.htmlString}
+                        resource={JSON.stringify({
+                          uri: 'ui://preview/html',
+                          mimeType: 'text/html',
+                          text: currentContent.htmlString
+                        })}
+                        html-props={JSON.stringify({
+                          sandboxPermissions: 'allow-scripts allow-forms allow-modals allow-popups'
+                        })}
+                      ></ui-resource-renderer>
+                    </div>
                   )}
                   {currentContent.type === 'externalUrl' && (
-                    <iframe
-                      key={currentContent.iframeUrl}
-                      src={currentContent.iframeUrl}
-                      className="w-full h-full border border-border rounded-lg bg-white"
-                      sandbox="allow-scripts allow-forms allow-same-origin allow-modals allow-popups"
-                      title="External URL Preview"
-                    />
+                    <div className="w-full h-full border border-border rounded-lg bg-white overflow-auto">
+                      <ui-resource-renderer
+                        class="w-full h-full block"
+                        ref={rendererRef}
+                        key={currentContent.iframeUrl}
+                        resource={JSON.stringify({
+                          uri: 'ui://preview/url',
+                          mimeType: 'text/uri-list',
+                          text: currentContent.iframeUrl
+                        })}
+                        html-props={JSON.stringify({
+                          sandboxPermissions: 'allow-scripts allow-forms allow-same-origin allow-modals allow-popups'
+                        })}
+                      ></ui-resource-renderer>
+                    </div>
                   )}
                   {currentContent.type === 'remoteDom' && (
                     <div className="h-full min-h-[320px] border border-border rounded-lg text-slate-100 p-4 flex flex-col">
@@ -312,8 +330,8 @@ export default function StudioPage() {
                         </span>
                       </div>
                       <div className="flex-1 overflow-auto p-4 rounded border">
-                        {/* @ts-ignore */}
                         <ui-resource-renderer
+                          class="w-full h-full block"
                           ref={rendererRef}
                           key={`${currentContent.script}-${currentContent.framework}`}
                           resource={JSON.stringify({
