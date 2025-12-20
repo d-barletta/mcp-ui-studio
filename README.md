@@ -1,23 +1,22 @@
 # MCP UI Studio
 
-**Professional visual development environment for MCP-UI interfaces**
+*Visual development environment for MCP-UI interfaces*
+
+[**Live Demo**](https://d-barletta.github.io/mcp-ui-studio) 
 
 Build production-ready MCP-UI handlers visually, test interactively, and export instantly.
 
-![MCP UI Studio](https://github.com/user-attachments/assets/24ba4c3d-30cd-47cb-8012-f9f617b2184d)
+
 
 ## Features
 
 ### 🎨 Template Gallery
-Browse and select from **8+ pre-built component templates** including:
+Browse and select from **pre-built component templates** including:
 - **Forms**: Contact forms, login forms
-- **Dashboards**: Analytics dashboards with stats cards
-- **Wizards**: Multi-step form wizards with progress indicators
 - **Tables**: Interactive data tables with sorting and filtering
-- **Settings**: User settings panels
 - **Cards**: Card galleries with images and actions
 - **Charts**: Analytics charts and metrics
-- **Notifications**: Notification feeds
+
 
 ### 👁️ Live Sandboxed Preview
 - Real-time component rendering
