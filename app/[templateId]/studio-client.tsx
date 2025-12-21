@@ -25,7 +25,7 @@ import { VisualEditor } from '@/components/visual-editor';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { ArrowLeft, Code, Eye, Download, AlertCircle, Terminal, RotateCw, Palette, Github, TrashIcon } from 'lucide-react';
+import { ArrowLeft, Code, Eye, Download, AlertCircle, Terminal, RotateCw, Palette, Github, TrashIcon, Maximize2, Minimize2 } from 'lucide-react';
 import { ThemeSwitcher } from '@/components/theme-switcher';
 import { Logo } from '@/components/logo';
 import { UIResourceRenderer, remoteButtonDefinition, remoteTextDefinition } from '@mcp-ui/client';
@@ -98,6 +98,7 @@ export default function StudioClient() {
   const [consoleMessages, setConsoleMessages] = useState<ConsoleMessage[]>([]);
   const [unreadCount, setUnreadCount] = useState(0);
   const [refreshKey, setRefreshKey] = useState(0);
+  const [isMaximized, setIsMaximized] = useState(false);
   const messageIdCounter = useRef(0);
   const rendererRef = useRef<HTMLElement>(null);
   const consoleEndRef = useRef<HTMLDivElement>(null);
@@ -307,9 +308,9 @@ export default function StudioClient() {
           </div>
 
           <TabsContent value="preview" className="flex-1 min-h-0 m-0">
-            <div className="h-full min-h-0 grid grid-rows-2 lg:grid-rows-none lg:grid-cols-2 divide-y lg:divide-y-0 lg:divide-x">
+            <div className={`h-full min-h-0 grid lg:grid-rows-none lg:grid-cols-2 divide-y lg:divide-y-0 lg:divide-x ${isMaximized ? 'grid-rows-1' : 'grid-rows-2'}`}>
               {/* Preview Panel */}
-              <div className="h-full overflow-hidden">
+              <div className={`h-full overflow-hidden ${isMaximized ? 'hidden lg:block' : ''}`}>
                 <div className="h-full p-4">
                   {currentContent.type === 'rawHtml' && (
                     <div className="w-full h-full border border-border rounded-lg bg-white overflow-auto">
@@ -419,13 +420,32 @@ export default function StudioClient() {
                 </div>
 
                 {rightPanelTab === 'visual' && (
-                  <div className="flex-1 min-h-0">
-                    <VisualEditor
-                      content={currentContent}
-                      uri="ui://my-component/instance-1"
-                      encoding="text"
-                      onChange={handleVisualEditorChange}
-                    />
+                  <div className="flex-1 min-h-0 flex flex-col">
+                    <div className="p-4 border-b bg-muted/50 flex items-center justify-between">
+                      <div>
+                        <h3 className="font-semibold">Visual Editor</h3>
+                        <p className="text-xs text-muted-foreground mt-1">
+                          Configure UI properties
+                        </p>
+                      </div>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className="lg:hidden"
+                        onClick={() => setIsMaximized(!isMaximized)}
+                        title={isMaximized ? "Minimize" : "Maximize"}
+                      >
+                        {isMaximized ? <Minimize2 className="h-4 w-4" /> : <Maximize2 className="h-4 w-4" />}
+                      </Button>
+                    </div>
+                    <div className="flex-1 min-h-0">
+                      <VisualEditor
+                        content={currentContent}
+                        uri="ui://my-component/instance-1"
+                        encoding="text"
+                        onChange={handleVisualEditorChange}
+                      />
+                    </div>
                   </div>
                 )}
 
@@ -439,6 +459,15 @@ export default function StudioClient() {
                         </p>
                       </div>
                       <div className="flex items-center gap-2">
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="lg:hidden"
+                          onClick={() => setIsMaximized(!isMaximized)}
+                          title={isMaximized ? "Minimize" : "Maximize"}
+                        >
+                          {isMaximized ? <Minimize2 className="h-4 w-4" /> : <Maximize2 className="h-4 w-4" />}
+                        </Button>
                         <Button
                           variant="outline"
                           size="sm"
@@ -476,15 +505,26 @@ export default function StudioClient() {
                         </p>
                       </div>
                   
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => setConsoleMessages([])}
-                        title="Clear"
-                      >
-                        <TrashIcon className="h-3 w-3 mr-2" />
-                        Clear
-                      </Button>
+                      <div className="flex items-center gap-2">
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="lg:hidden"
+                          onClick={() => setIsMaximized(!isMaximized)}
+                          title={isMaximized ? "Minimize" : "Maximize"}
+                        >
+                          {isMaximized ? <Minimize2 className="h-4 w-4" /> : <Maximize2 className="h-4 w-4" />}
+                        </Button>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => setConsoleMessages([])}
+                          title="Clear"
+                        >
+                          <TrashIcon className="h-3 w-3 mr-2" />
+                          Clear
+                        </Button>
+                      </div>
                     </div>
                     <div className="flex-1 min-h-0 overflow-auto">
                       <div className="p-4 font-mono text-xs space-y-2">

@@ -164,8 +164,6 @@ export function VisualEditor({ content, uri = 'ui://my-component/instance-1', en
       {/* Configuration Panel */}
       <div className="p-4 border-b space-y-4 bg-muted/50 shrink-0">
         <div>
-          <h3 className="font-semibold mb-4">Resource Configuration</h3>
-          
           <div className="grid grid-cols-1 gap-4">
             {/* URI Field */}
             <div className="space-y-2">
