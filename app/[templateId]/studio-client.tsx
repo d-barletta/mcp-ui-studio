@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useRef } from 'react';
 import { useParams, useRouter } from 'next/navigation';
+import Link from 'next/link';
 
 // Add custom element type for ui-resource-renderer
 declare global {
@@ -252,9 +253,9 @@ export default function StudioClient() {
   return (
     <main className="h-screen flex flex-col bg-background">
       {/* Header */}
-      <header className="border-b px-4 py-3 flex items-center justify-between">
+      <header className="border-b px-4 py-3 flex items-center justify-between gap-4">
         <div className="flex items-center gap-4">
-          <Button variant="ghost" size="icon" onClick={handleBackToGallery}>
+          <Button variant="ghost" size="icon" onClick={handleBackToGallery} className="shrink-0 aspect-square">
             <ArrowLeft className="h-4 w-4" />
           </Button>
           <div>
@@ -262,7 +263,7 @@ export default function StudioClient() {
             <p className="text-sm text-muted-foreground">{selectedTemplate.description}</p>
           </div>
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-1">
           <Button 
             variant="ghost" 
             size="icon"
@@ -278,10 +279,10 @@ export default function StudioClient() {
             </a>
           </Button>
           <ThemeSwitcher />
-          <div className="flex items-center gap-2 text-muted-foreground">
-            <Logo className="h-4 w-4" />
-            <span className="text-sm">MCP UI Studio</span>
-          </div>
+          <Link href="/" className="h-9 w-9 md:w-auto md:h-auto justify-center flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors">
+            <Logo className="h-4 w-4 shrink-0 aspect-square" />
+            <span className="text-sm hidden md:inline">MCP UI Studio</span>
+          </Link>
         </div>
       </header>
 
