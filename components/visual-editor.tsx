@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef, forwardRef, useImperativeHandle } from 'react';
 import dynamic from 'next/dynamic';
 import { ContentType } from '@/lib/types';
 import { Label } from './ui/label';
@@ -20,29 +20,49 @@ const MonacoEditor = dynamic(() => import('@monaco-editor/react'), {
   ),
 });
 
+export interface VisualEditorHandle {
+  undo: () => void;
+  redo: () => void;
+}
+
 interface VisualEditorProps {
   content: ContentType;
   uri?: string;
   encoding?: 'text' | 'blob';
   onChange: (config: { content: ContentType; uri: string; encoding: 'text' | 'blob' }) => void;
+  onHistoryChange?: (canUndo: boolean, canRedo: boolean) => void;
 }
 
-export function VisualEditor({ content, uri = 'ui://my-component/instance-1', encoding = 'text', onChange }: VisualEditorProps) {
-  const [currentUri, setCurrentUri] = useState(uri);
-  const [currentEncoding, setCurrentEncoding] = useState<'text' | 'blob'>(encoding);
-  const [currentContentType, setCurrentContentType] = useState<'rawHtml' | 'externalUrl' | 'remoteDom'>(content.type);
-  
-  // Content-specific state
-  const [htmlString, setHtmlString] = useState(content.type === 'rawHtml' ? content.htmlString : '');
-  const [iframeUrl, setIframeUrl] = useState(content.type === 'externalUrl' ? content.iframeUrl : '');
-  const [script, setScript] = useState(content.type === 'remoteDom' ? content.script : '');
-  const [framework, setFramework] = useState<'react' | 'webcomponents'>(
-    content.type === 'remoteDom' ? content.framework : 'react'
-  );
+interface VisualEditorState {
+  uri: string;
+  encoding: 'text' | 'blob';
+  contentType: 'rawHtml' | 'externalUrl' | 'remoteDom';
+  htmlString: string;
+  iframeUrl: string;
+  script: string;
+  framework: 'react' | 'webcomponents';
+}
+
+export const VisualEditor = forwardRef<VisualEditorHandle, VisualEditorProps>(({ content, uri = 'ui://my-component/instance-1', encoding = 'text', onChange, onHistoryChange }, ref) => {
+  // Initial state
+  const initialState: VisualEditorState = {
+    uri,
+    encoding,
+    contentType: content.type,
+    htmlString: content.type === 'rawHtml' ? content.htmlString : '',
+    iframeUrl: content.type === 'externalUrl' ? content.iframeUrl : '',
+    script: content.type === 'remoteDom' ? content.script : '',
+    framework: content.type === 'remoteDom' ? content.framework : 'react',
+  };
+
+  const [state, setState] = useState<VisualEditorState>(initialState);
+  const [history, setHistory] = useState<VisualEditorState[]>([]);
+  const [future, setFuture] = useState<VisualEditorState[]>([]);
   
   const [htmlError, setHtmlError] = useState<string | null>(null);
   const [fontSize, setFontSize] = useState(12);
   const [isEditorExpanded, setIsEditorExpanded] = useState(false);
+  const editorRef = useRef<any>(null);
 
   useEffect(() => {
     const handleResize = () => {
@@ -54,81 +74,72 @@ export function VisualEditor({ content, uri = 'ui://my-component/instance-1', en
     return () => window.removeEventListener('resize', handleResize);
   }, []);
 
-  // Build and emit the content change
-  const emitChange = useCallback((
-    contentType: 'rawHtml' | 'externalUrl' | 'remoteDom',
-    html: string,
-    url: string,
-    scr: string,
-    fw: 'react' | 'webcomponents',
-    uri: string,
-    enc: 'text' | 'blob'
-  ) => {
-    let newContent: ContentType;
+  // Update state and history
+  const updateState = (newState: Partial<VisualEditorState>, addToHistory = true) => {
+    if (addToHistory) {
+      setHistory(prev => [...prev, state]);
+      setFuture([]);
+    }
     
-    if (contentType === 'rawHtml') {
-      newContent = { type: 'rawHtml', htmlString: html };
-    } else if (contentType === 'externalUrl') {
-      newContent = { type: 'externalUrl', iframeUrl: url };
+    const updatedState = { ...state, ...newState };
+    setState(updatedState);
+    
+    // Emit change
+    let newContent: ContentType;
+    if (updatedState.contentType === 'rawHtml') {
+      newContent = { type: 'rawHtml', htmlString: updatedState.htmlString };
+    } else if (updatedState.contentType === 'externalUrl') {
+      newContent = { type: 'externalUrl', iframeUrl: updatedState.iframeUrl };
     } else {
-      newContent = { type: 'remoteDom', script: scr, framework: fw };
+      newContent = { type: 'remoteDom', script: updatedState.script, framework: updatedState.framework };
     }
     
     onChange({
       content: newContent,
-      uri,
-      encoding: enc,
+      uri: updatedState.uri,
+      encoding: updatedState.encoding,
     });
-  }, [onChange]);
+  };
 
   // Sync with external content changes (only when prop changes)
   useEffect(() => {
-    setCurrentContentType(content.type);
-    if (content.type === 'rawHtml') {
-      setHtmlString(content.htmlString);
-    } else if (content.type === 'externalUrl') {
-      setIframeUrl(content.iframeUrl);
-    } else if (content.type === 'remoteDom') {
-      setScript(content.script);
-      setFramework(content.framework);
+    // Only update if the content is different from current state to avoid loops
+    // This is a simplified check
+    if (content.type !== state.contentType) {
+      // External update logic if needed, but usually we drive state from here
     }
   }, [content]);
 
   const handleContentTypeChange = (value: string) => {
-    const newType = value as 'rawHtml' | 'externalUrl' | 'remoteDom';
-    setCurrentContentType(newType);
-    emitChange(newType, htmlString, iframeUrl, script, framework, currentUri, currentEncoding);
+    updateState({ contentType: value as any });
   };
 
   const handleUriChange = (value: string) => {
-    setCurrentUri(value);
-    emitChange(currentContentType, htmlString, iframeUrl, script, framework, value, currentEncoding);
+    updateState({ uri: value });
   };
 
   const handleEncodingChange = (value: 'text' | 'blob') => {
-    setCurrentEncoding(value);
-    emitChange(currentContentType, htmlString, iframeUrl, script, framework, currentUri, value);
+    updateState({ encoding: value });
   };
 
   const handleIframeUrlChange = (value: string) => {
-    setIframeUrl(value);
-    emitChange(currentContentType, htmlString, value, script, framework, currentUri, currentEncoding);
+    updateState({ iframeUrl: value });
   };
 
   const handleFrameworkChange = (value: 'react' | 'webcomponents') => {
-    setFramework(value);
-    emitChange(currentContentType, htmlString, iframeUrl, script, value, currentUri, currentEncoding);
+    updateState({ framework: value });
   };
 
   const handleScriptChange = (value: string | undefined) => {
     if (value === undefined) return;
-    setScript(value);
-    emitChange(currentContentType, htmlString, iframeUrl, value, framework, currentUri, currentEncoding);
+    // For editor changes, we might want to debounce history updates or handle them differently
+    // For now, we'll just update state without adding to history for every keystroke
+    // Ideally, we'd add to history on blur or after a pause
+    updateState({ script: value }, false); 
   };
 
   const handleHtmlChange = (value: string | undefined) => {
     if (value === undefined) return;
-    setHtmlString(value);
     
     // Basic HTML validation
     try {
@@ -145,8 +156,11 @@ export function VisualEditor({ content, uri = 'ui://my-component/instance-1', en
       setHtmlError('HTML parsing error');
     }
 
-    emitChange(currentContentType, value, iframeUrl, script, framework, currentUri, currentEncoding);
+    updateState({ htmlString: value }, false);
   };
+
+  // Save editor state to history on blur or specific actions if needed
+  // For now, we rely on manual state updates for non-editor fields
 
   const handleEditorWillMount = (monaco: any) => {
     // Configure HTML validation
@@ -161,6 +175,78 @@ export function VisualEditor({ content, uri = 'ui://my-component/instance-1', en
     });
   };
 
+  const handleEditorDidMount = (editor: any) => {
+    editorRef.current = editor;
+    
+    // Add history entry when editor content changes (debounced or on blur could be better)
+    // But since we disabled history for onChange, we need a way to capture it.
+    // Let's capture on blur for now
+    editor.onDidBlurEditorText(() => {
+      setHistory(prev => [...prev, state]);
+    });
+  };
+
+  const handleUndo = () => {
+    if (history.length === 0) return;
+    const previous = history[history.length - 1];
+    const newHistory = history.slice(0, -1);
+    
+    setFuture(prev => [state, ...prev]);
+    setHistory(newHistory);
+    setState(previous);
+    
+    // Emit change for undo
+    let newContent: ContentType;
+    if (previous.contentType === 'rawHtml') {
+      newContent = { type: 'rawHtml', htmlString: previous.htmlString };
+    } else if (previous.contentType === 'externalUrl') {
+      newContent = { type: 'externalUrl', iframeUrl: previous.iframeUrl };
+    } else {
+      newContent = { type: 'remoteDom', script: previous.script, framework: previous.framework };
+    }
+    
+    onChange({
+      content: newContent,
+      uri: previous.uri,
+      encoding: previous.encoding,
+    });
+  };
+
+  const handleRedo = () => {
+    if (future.length === 0) return;
+    const next = future[0];
+    const newFuture = future.slice(1);
+    
+    setHistory(prev => [...prev, state]);
+    setFuture(newFuture);
+    setState(next);
+    
+    // Emit change for redo
+    let newContent: ContentType;
+    if (next.contentType === 'rawHtml') {
+      newContent = { type: 'rawHtml', htmlString: next.htmlString };
+    } else if (next.contentType === 'externalUrl') {
+      newContent = { type: 'externalUrl', iframeUrl: next.iframeUrl };
+    } else {
+      newContent = { type: 'remoteDom', script: next.script, framework: next.framework };
+    }
+    
+    onChange({
+      content: newContent,
+      uri: next.uri,
+      encoding: next.encoding,
+    });
+  };
+
+  useImperativeHandle(ref, () => ({
+    undo: handleUndo,
+    redo: handleRedo
+  }));
+
+  useEffect(() => {
+    onHistoryChange?.(history.length > 0, future.length > 0);
+  }, [history, future, onHistoryChange]);
+
   return (
     <div className="h-full flex flex-col overflow-y-auto">
       {/* Configuration Panel */}
@@ -174,92 +260,92 @@ export function VisualEditor({ content, uri = 'ui://my-component/instance-1', en
                 <Input
                   id="uri"
                   type="text"
-                value={currentUri}
-                onChange={(e) => handleUriChange(e.target.value)}
-                placeholder="ui://my-component/instance-1"
-                className="font-mono text-sm"
-              />
-              <p className="text-xs text-muted-foreground">
-                Unique identifier for this UI resource
-              </p>
-            </div>
-
-            {/* Content Type Selector */}
-            <div className="space-y-2">
-              <Label htmlFor="contentType">Content Type</Label>
-              <Select value={currentContentType} onValueChange={handleContentTypeChange}>
-                <SelectTrigger id="contentType">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="rawHtml">Raw HTML</SelectItem>
-                  <SelectItem value="externalUrl">External URL (iframe)</SelectItem>
-                  <SelectItem value="remoteDom">Remote DOM</SelectItem>
-                </SelectContent>
-              </Select>
-              <p className="text-xs text-muted-foreground">
-                {currentContentType === 'rawHtml' && 'Render HTML string in sandboxed iframe'}
-                {currentContentType === 'externalUrl' && 'Load external URL in iframe'}
-                {currentContentType === 'remoteDom' && 'Execute remote DOM script'}
-              </p>
-            </div>
-
-            {/* Encoding Selector */}
-            <div className="space-y-2">
-              <Label htmlFor="encoding">Encoding</Label>
-              <Select value={currentEncoding} onValueChange={handleEncodingChange}>
-                <SelectTrigger id="encoding">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="text">Text</SelectItem>
-                  <SelectItem value="blob">Blob (Base64)</SelectItem>
-                </SelectContent>
-              </Select>
-              <p className="text-xs text-muted-foreground">
-                Text for direct content, Blob for base64-encoded content
-              </p>
-            </div>
-
-            {/* External URL Input (only for externalUrl type) */}
-            {currentContentType === 'externalUrl' && (
-              <div className="space-y-2">
-                <Label htmlFor="iframeUrl">External URL</Label>
-                <Input
-                  id="iframeUrl"
-                  type="url"
-                  value={iframeUrl}
-                  onChange={(e) => handleIframeUrlChange(e.target.value)}
-                  placeholder="https://example.com/dashboard"
+                  value={state.uri}
+                  onChange={(e) => handleUriChange(e.target.value)}
+                  placeholder="ui://my-component/instance-1"
                   className="font-mono text-sm"
                 />
                 <p className="text-xs text-muted-foreground">
-                  URL to load in the iframe
+                  Unique identifier for this UI resource
                 </p>
               </div>
-            )}
 
-            {/* Framework Selector (only for remoteDom type) */}
-            {currentContentType === 'remoteDom' && (
+              {/* Content Type Selector */}
               <div className="space-y-2">
-                <Label htmlFor="framework">Framework</Label>
-                <Select value={framework} onValueChange={handleFrameworkChange}>
-                  <SelectTrigger id="framework">
+                <Label htmlFor="contentType">Content Type</Label>
+                <Select value={state.contentType} onValueChange={handleContentTypeChange}>
+                  <SelectTrigger id="contentType">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="react">React</SelectItem>
-                    <SelectItem value="webcomponents">Web Components</SelectItem>
+                    <SelectItem value="rawHtml">Raw HTML</SelectItem>
+                    <SelectItem value="externalUrl">External URL (iframe)</SelectItem>
+                    <SelectItem value="remoteDom">Remote DOM</SelectItem>
                   </SelectContent>
                 </Select>
                 <p className="text-xs text-muted-foreground">
-                  Framework used in the remote DOM script
+                  {state.contentType === 'rawHtml' && 'Render HTML string in sandboxed iframe'}
+                  {state.contentType === 'externalUrl' && 'Load external URL in iframe'}
+                  {state.contentType === 'remoteDom' && 'Execute remote DOM script'}
                 </p>
               </div>
-            )}
+
+              {/* Encoding Selector */}
+              <div className="space-y-2">
+                <Label htmlFor="encoding">Encoding</Label>
+                <Select value={state.encoding} onValueChange={handleEncodingChange}>
+                  <SelectTrigger id="encoding">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="text">Text</SelectItem>
+                    <SelectItem value="blob">Blob (Base64)</SelectItem>
+                  </SelectContent>
+                </Select>
+                <p className="text-xs text-muted-foreground">
+                  Text for direct content, Blob for base64-encoded content
+                </p>
+              </div>
+
+              {/* External URL Input (only for externalUrl type) */}
+              {state.contentType === 'externalUrl' && (
+                <div className="space-y-2">
+                  <Label htmlFor="iframeUrl">External URL</Label>
+                  <Input
+                    id="iframeUrl"
+                    type="url"
+                    value={state.iframeUrl}
+                    onChange={(e) => handleIframeUrlChange(e.target.value)}
+                    placeholder="https://example.com/dashboard"
+                    className="font-mono text-sm"
+                  />
+                  <p className="text-xs text-muted-foreground">
+                    URL to load in the iframe
+                  </p>
+                </div>
+              )}
+
+              {/* Framework Selector (only for remoteDom type) */}
+              {state.contentType === 'remoteDom' && (
+                <div className="space-y-2">
+                  <Label htmlFor="framework">Framework</Label>
+                  <Select value={state.framework} onValueChange={handleFrameworkChange}>
+                    <SelectTrigger id="framework">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="react">React</SelectItem>
+                      <SelectItem value="webcomponents">Web Components</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  <p className="text-xs text-muted-foreground">
+                    Framework used in the remote DOM script
+                  </p>
+                </div>
+              )}
+            </div>
           </div>
         </div>
-      </div>
       )}
 
       {/* Content Editor */}
@@ -267,18 +353,18 @@ export function VisualEditor({ content, uri = 'ui://my-component/instance-1', en
         <div className="p-4 border-b bg-muted/50 flex items-center justify-between">
           <div>
             <h3 className="font-semibold">
-              {currentContentType === 'rawHtml' && 'HTML Content'}
-              {currentContentType === 'externalUrl' && 'External URL Configuration'}
-              {currentContentType === 'remoteDom' && 'Remote DOM Script'}
+              {state.contentType === 'rawHtml' && 'HTML Content'}
+              {state.contentType === 'externalUrl' && 'External URL Configuration'}
+              {state.contentType === 'remoteDom' && 'Remote DOM Script'}
             </h3>
             <p className="text-xs text-muted-foreground mt-1">
-              {currentContentType === 'rawHtml' && 'Edit your HTML content with syntax validation'}
-              {currentContentType === 'externalUrl' && 'Configure the external URL in the fields above'}
-              {currentContentType === 'remoteDom' && 'Edit your remote DOM script'}
+              {state.contentType === 'rawHtml' && 'Edit your HTML content with syntax validation'}
+              {state.contentType === 'externalUrl' && 'Configure the external URL in the fields above'}
+              {state.contentType === 'remoteDom' && 'Edit your remote DOM script'}
             </p>
           </div>
           <div className="flex items-center gap-2">
-            {htmlError && currentContentType === 'rawHtml' && (
+            {htmlError && state.contentType === 'rawHtml' && (
               <div className="flex items-center gap-2 text-destructive text-xs mr-2">
                 <AlertCircle className="h-4 w-4" />
                 <span>{htmlError}</span>
@@ -295,15 +381,16 @@ export function VisualEditor({ content, uri = 'ui://my-component/instance-1', en
           </div>
         </div>
 
-        {currentContentType === 'rawHtml' && (
+        {state.contentType === 'rawHtml' && (
           <div className="flex-1 min-h-0">
             <MonacoEditor
               height="100%"
               language="html"
-              value={htmlString}
+              value={state.htmlString}
               onChange={handleHtmlChange}
               theme="vs-dark"
               beforeMount={handleEditorWillMount}
+              onMount={handleEditorDidMount}
               options={{
                 minimap: { enabled: false },
                 fontSize,
@@ -317,7 +404,7 @@ export function VisualEditor({ content, uri = 'ui://my-component/instance-1', en
           </div>
         )}
 
-        {currentContentType === 'externalUrl' && (
+        {state.contentType === 'externalUrl' && (
           <div className="flex-1 p-2">
             <Card>
               <CardHeader>
@@ -328,21 +415,22 @@ export function VisualEditor({ content, uri = 'ui://my-component/instance-1', en
               </CardHeader>
               <CardContent>
                 <div className="p-4 bg-muted rounded-md">
-                  <p className="text-sm font-mono break-all">{iframeUrl || 'No URL specified'}</p>
+                  <p className="text-sm font-mono break-all">{state.iframeUrl || 'No URL specified'}</p>
                 </div>
               </CardContent>
             </Card>
           </div>
         )}
 
-        {currentContentType === 'remoteDom' && (
+        {state.contentType === 'remoteDom' && (
           <div className="flex-1 min-h-0">
             <MonacoEditor
               height="100%"
               language="javascript"
-              value={script}
+              value={state.script}
               onChange={handleScriptChange}
               theme="vs-dark"
+              onMount={handleEditorDidMount}
               options={{
                 minimap: { enabled: false },
                 fontSize,
@@ -357,4 +445,4 @@ export function VisualEditor({ content, uri = 'ui://my-component/instance-1', en
       </div>
     </div>
   );
-}
+});

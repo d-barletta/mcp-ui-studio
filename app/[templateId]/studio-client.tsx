@@ -25,10 +25,11 @@ import { VisualEditor } from '@/components/visual-editor';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { ArrowLeft, Code, Eye, Download, AlertCircle, Terminal, RotateCw, Palette, Github, TrashIcon, Maximize2, Minimize2 } from 'lucide-react';
+import { ArrowLeft, Code, Eye, Download, AlertCircle, Terminal, RotateCw, Palette, Github, TrashIcon, Maximize2, Minimize2, Undo, Redo } from 'lucide-react';
 import { ThemeSwitcher } from '@/components/theme-switcher';
 import { Logo } from '@/components/logo';
 import { UIResourceRenderer, remoteButtonDefinition, remoteTextDefinition } from '@mcp-ui/client';
+import { VisualEditorHandle } from '@/components/visual-editor';
 
 interface ConsoleMessage {
   id: number;
@@ -97,6 +98,9 @@ export default function StudioClient() {
   const [rightPanelTab, setRightPanelTab] = useState<'editor' | 'visual' | 'console'>('visual');
   const [consoleMessages, setConsoleMessages] = useState<ConsoleMessage[]>([]);
   const [unreadCount, setUnreadCount] = useState(0);
+  const [canUndo, setCanUndo] = useState(false);
+  const [canRedo, setCanRedo] = useState(false);
+  const visualEditorRef = useRef<VisualEditorHandle>(null);
   const [refreshKey, setRefreshKey] = useState(0);
   const [isMaximized, setIsMaximized] = useState(false);
   const messageIdCounter = useRef(0);
@@ -428,22 +432,47 @@ export default function StudioClient() {
                           Configure UI properties
                         </p>
                       </div>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        className="lg:hidden"
-                        onClick={() => setIsMaximized(!isMaximized)}
-                        title={isMaximized ? "Minimize" : "Maximize"}
-                      >
-                        {isMaximized ? <Minimize2 className="h-4 w-4" /> : <Maximize2 className="h-4 w-4" />}
-                      </Button>
+                      <div className="flex items-center gap-2">
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          onClick={() => visualEditorRef.current?.undo()}
+                          disabled={!canUndo}
+                          title="Undo"
+                        >
+                          <Undo className="h-4 w-4" />
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          onClick={() => visualEditorRef.current?.redo()}
+                          disabled={!canRedo}
+                          title="Redo"
+                        >
+                          <Redo className="h-4 w-4" />
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="lg:hidden"
+                          onClick={() => setIsMaximized(!isMaximized)}
+                          title={isMaximized ? "Minimize" : "Maximize"}
+                        >
+                          {isMaximized ? <Minimize2 className="h-4 w-4" /> : <Maximize2 className="h-4 w-4" />}
+                        </Button>
+                      </div>
                     </div>
                     <div className="flex-1 min-h-0 overflow-auto">
                       <VisualEditor
+                        ref={visualEditorRef}
                         content={currentContent}
                         uri="ui://my-component/instance-1"
                         encoding="text"
                         onChange={handleVisualEditorChange}
+                        onHistoryChange={(undo, redo) => {
+                          setCanUndo(undo);
+                          setCanRedo(redo);
+                        }}
                       />
                     </div>
                   </div>
