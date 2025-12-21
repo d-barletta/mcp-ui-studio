@@ -149,9 +149,9 @@ export function VisualEditor({ content, uri = 'ui://my-component/instance-1', en
   };
 
   return (
-    <div className="h-full flex flex-col">
+    <div className="h-full flex flex-col overflow-y-auto md:overflow-hidden">
       {/* Configuration Panel */}
-      <div className="p-4 border-b space-y-4 bg-muted/50">
+      <div className="p-4 border-b space-y-4 bg-muted/50 shrink-0">
         <div>
           <h3 className="font-semibold mb-4">Resource Configuration</h3>
           
@@ -250,7 +250,7 @@ export function VisualEditor({ content, uri = 'ui://my-component/instance-1', en
       </div>
 
       {/* Content Editor */}
-      <div className="flex-1 min-h-0 flex flex-col">
+      <div className="flex-1 min-h-[300px] md:min-h-0 flex flex-col">
         <div className="p-4 border-b bg-muted/50 flex items-center justify-between">
           <div>
             <h3 className="font-semibold">
