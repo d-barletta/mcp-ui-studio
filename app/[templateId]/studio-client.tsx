@@ -25,7 +25,7 @@ import { VisualEditor } from '@/components/visual-editor';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { ArrowLeft, Code, Eye, Download, AlertCircle, Terminal, RotateCw, Palette, Github } from 'lucide-react';
+import { ArrowLeft, Code, Eye, Download, AlertCircle, Terminal, RotateCw, Palette, Github, TrashIcon } from 'lucide-react';
 import { ThemeSwitcher } from '@/components/theme-switcher';
 import { Logo } from '@/components/logo';
 import { UIResourceRenderer, remoteButtonDefinition, remoteTextDefinition } from '@mcp-ui/client';
@@ -347,7 +347,7 @@ export default function StudioClient() {
                   )}
                   {currentContent.type === 'remoteDom' && (
                     <div className="h-full min-h-[320px] border border-border rounded-lg text-slate-100 p-4 flex flex-col">
-                      <div className="text-xs text-slate-300 mb-4 pb-2 border-b flex items-center justify-between">
+                      <div className="text-xs text-slate-300 mb-4 flex items-center justify-between">
                         <span>Remote DOM Preview</span>
                         <span className="text-[10px] px-2 py-1 bg-green-200 text-green-800 rounded">
                           LIVE
@@ -401,7 +401,7 @@ export default function StudioClient() {
                     </button>
                     <button
                       onClick={() => setRightPanelTab('console')}
-                      className={`flex-1 px-4 py-3 text-sm font-medium transition-colors relative ${
+                      className={`flex-1 px-4 py-3 text-sm font-medium transition-colors relative whitespace-nowrap ${
                         rightPanelTab === 'console'
                           ? 'bg-background border-b-2 border-primary text-foreground'
                           : 'text-muted-foreground hover:text-foreground'
@@ -435,7 +435,7 @@ export default function StudioClient() {
                       <div>
                         <h3 className="font-semibold">createUIResource Options</h3>
                         <p className="text-xs text-muted-foreground mt-1">
-                          Edit options object (live preview updates)
+                          Edit options object (live preview)
                         </p>
                       </div>
                       <div className="flex items-center gap-2">
@@ -475,11 +475,14 @@ export default function StudioClient() {
                           UI actions and events log
                         </p>
                       </div>
+                  
                       <Button
-                        variant="ghost"
+                        variant="outline"
                         size="sm"
                         onClick={() => setConsoleMessages([])}
+                        title="Clear"
                       >
+                        <TrashIcon className="h-3 w-3 mr-2" />
                         Clear
                       </Button>
                     </div>
