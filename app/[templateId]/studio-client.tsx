@@ -307,7 +307,7 @@ export default function StudioClient() {
           </div>
 
           <TabsContent value="preview" className="flex-1 min-h-0 m-0">
-            <div className="h-full min-h-0 grid grid-cols-1 lg:grid-cols-2 divide-x">
+            <div className="h-full min-h-0 grid grid-rows-2 lg:grid-rows-none lg:grid-cols-2 divide-y lg:divide-y-0 lg:divide-x">
               {/* Preview Panel */}
               <div className="h-full overflow-hidden">
                 <div className="h-full p-4">
