@@ -160,7 +160,7 @@ export function VisualEditor({ content, uri = 'ui://my-component/instance-1', en
   };
 
   return (
-    <div className="h-full flex flex-col overflow-y-auto md:overflow-hidden">
+    <div className="h-full flex flex-col overflow-y-auto">
       {/* Configuration Panel */}
       <div className="p-4 border-b space-y-4 bg-muted/50 shrink-0">
         <div>
@@ -304,7 +304,7 @@ export function VisualEditor({ content, uri = 'ui://my-component/instance-1', en
         )}
 
         {currentContentType === 'externalUrl' && (
-          <div className="flex-1 min-h-0 p-8">
+          <div className="flex-1 p-2">
             <Card>
               <CardHeader>
                 <CardTitle>External URL Configuration</CardTitle>

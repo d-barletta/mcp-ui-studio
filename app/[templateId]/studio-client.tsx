@@ -438,7 +438,7 @@ export default function StudioClient() {
                         {isMaximized ? <Minimize2 className="h-4 w-4" /> : <Maximize2 className="h-4 w-4" />}
                       </Button>
                     </div>
-                    <div className="flex-1 min-h-0">
+                    <div className="flex-1 min-h-0 overflow-auto">
                       <VisualEditor
                         content={currentContent}
                         uri="ui://my-component/instance-1"
