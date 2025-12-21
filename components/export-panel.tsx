@@ -81,7 +81,7 @@ export function ExportPanel({ content }: ExportPanelProps) {
             ) : (
               <>
                 <Copy className="mr-2 h-4 w-4" />
-                Copy Code
+                Copy
               </>
             )}
           </Button>

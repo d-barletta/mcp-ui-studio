@@ -469,13 +469,12 @@ export default function StudioClient() {
                           {isMaximized ? <Minimize2 className="h-4 w-4" /> : <Maximize2 className="h-4 w-4" />}
                         </Button>
                         <Button
-                          variant="outline"
+                          variant="ghost"
                           size="sm"
                           onClick={handleRefresh}
                           title="Refresh Preview"
                         >
-                          <RotateCw className="h-3 w-3 mr-2" />
-                          Refresh
+                          <RotateCw className="h-3 w-3" />
                         </Button>
                         {contentError && (
                           <div className="flex items-center gap-2 text-destructive text-xs">
@@ -516,13 +515,12 @@ export default function StudioClient() {
                           {isMaximized ? <Minimize2 className="h-4 w-4" /> : <Maximize2 className="h-4 w-4" />}
                         </Button>
                         <Button
-                          variant="outline"
+                          variant="ghost"
                           size="sm"
                           onClick={() => setConsoleMessages([])}
                           title="Clear"
                         >
-                          <TrashIcon className="h-3 w-3 mr-2" />
-                          Clear
+                          <TrashIcon className="h-3 w-3" />
                         </Button>
                       </div>
                     </div>
