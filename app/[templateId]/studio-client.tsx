@@ -284,7 +284,7 @@ export default function StudioClient() {
             </a>
           </Button>
           <ThemeSwitcher />
-          <Link href="/" className="h-9 w-9 md:w-auto md:h-auto justify-center flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors">
+          <Link href="/" className="h-9 w-9 md:pl-2 md:w-auto md:h-auto justify-center flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors">
             <Logo className="h-4 w-4 shrink-0 aspect-square" />
             <span className="text-sm hidden md:inline">MCP UI Studio</span>
           </Link>
