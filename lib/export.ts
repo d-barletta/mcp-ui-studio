@@ -9,7 +9,7 @@ export interface CreateUIResourceOptions {
 
 export function createUIResource(options: CreateUIResourceOptions): UIResource {
   const { uri, content, encoding = 'text' } = options;
-  
+
   let mimeType: UIResource['resource']['mimeType'];
   let resourceContent: string;
 
@@ -20,7 +20,8 @@ export function createUIResource(options: CreateUIResourceOptions): UIResource {
     mimeType = 'text/uri-list';
     resourceContent = content.iframeUrl;
   } else {
-    mimeType = `application/vnd.mcp-ui.remote-dom+javascript; framework=${content.framework}` as UIResource['resource']['mimeType'];
+    mimeType =
+      `application/vnd.mcp-ui.remote-dom+javascript; framework=${content.framework}` as UIResource['resource']['mimeType'];
     resourceContent = content.script;
   }
 
@@ -41,9 +42,12 @@ export function createUIResource(options: CreateUIResourceOptions): UIResource {
   return resource;
 }
 
-export function generateTypeScriptExport(content: ContentType, encoding: Encoding = 'text'): string {
+export function generateTypeScriptExport(
+  content: ContentType,
+  encoding: Encoding = 'text'
+): string {
   let contentStr: string;
-  
+
   if (content.type === 'rawHtml') {
     // Use template literal for HTML
     contentStr = `{
@@ -168,6 +172,6 @@ export function convertShadcnToMCPUI(_shadcnCode: string): ContentType {
   // For now, we'll return a basic HTML structure
   return {
     type: 'rawHtml',
-    htmlString: '<div class="converted-from-shadcn"><p>Converted component</p></div>'
+    htmlString: '<div class="converted-from-shadcn"><p>Converted component</p></div>',
   };
 }

@@ -9,17 +9,20 @@ export interface UIResource {
   };
 }
 
-export type ContentType = {
-  type: 'rawHtml';
-  htmlString: string;
-} | {
-  type: 'externalUrl';
-  iframeUrl: string;
-} | {
-  type: 'remoteDom';
-  script: string;
-  framework: 'react' | 'webcomponents';
-};
+export type ContentType =
+  | {
+      type: 'rawHtml';
+      htmlString: string;
+    }
+  | {
+      type: 'externalUrl';
+      iframeUrl: string;
+    }
+  | {
+      type: 'remoteDom';
+      script: string;
+      framework: 'react' | 'webcomponents';
+    };
 
 export type Encoding = 'text' | 'blob';
 

@@ -17,10 +17,10 @@ export default function GalleryPage() {
 
   return (
     <main className="min-h-screen bg-background">
-      <div className="container mx-auto py-8 px-4">
+      <div className="container mx-auto px-4 py-8">
         <div className="mb-8 flex items-start justify-between">
           <div>
-            <div className="flex items-center gap-3 mb-2">
+            <div className="mb-2 flex items-center gap-3">
               <Logo className="h-10 w-10" />
               <h1 className="text-4xl font-bold">MCP UI Studio</h1>
             </div>
@@ -29,14 +29,10 @@ export default function GalleryPage() {
             </p>
           </div>
           <div className="flex items-center gap-2">
-            <Button 
-              variant="ghost" 
-              size="icon"
-              asChild
-            >
-              <a 
-                href="https://github.com/d-barletta/mcp-ui-studio" 
-                target="_blank" 
+            <Button variant="ghost" size="icon" asChild>
+              <a
+                href="https://github.com/d-barletta/mcp-ui-studio"
+                target="_blank"
                 rel="noopener noreferrer"
                 aria-label="View on GitHub"
               >
@@ -51,4 +47,3 @@ export default function GalleryPage() {
     </main>
   );
 }
-

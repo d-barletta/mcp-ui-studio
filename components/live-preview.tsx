@@ -32,15 +32,16 @@ export function LivePreview({ component }: LivePreviewProps) {
     switch (type) {
       case 'form':
         return (
-          <Card key={`${type}-${depth}`} className="w-full max-w-2xl mx-auto">
+          <Card key={`${type}-${depth}`} className="mx-auto w-full max-w-2xl">
             <CardHeader>
               <CardTitle>{getStringProp('title', 'Form')}</CardTitle>
-              {getStringProp('description') && <CardDescription>{getStringProp('description')}</CardDescription>}
+              {getStringProp('description') && (
+                <CardDescription>{getStringProp('description')}</CardDescription>
+              )}
             </CardHeader>
             <CardContent className="space-y-4">
-              {Array.isArray(children) && children.map((child, i) => (
-                <div key={i}>{renderComponent(child, depth + 1)}</div>
-              ))}
+              {Array.isArray(children) &&
+                children.map((child, i) => <div key={i}>{renderComponent(child, depth + 1)}</div>)}
             </CardContent>
           </Card>
         );
@@ -72,7 +73,10 @@ export function LivePreview({ component }: LivePreviewProps) {
 
       case 'button':
         return (
-          <Button key={`${type}-${depth}`} variant={getStringProp('variant') === 'primary' ? 'default' : 'outline'}>
+          <Button
+            key={`${type}-${depth}`}
+            variant={getStringProp('variant') === 'primary' ? 'default' : 'outline'}
+          >
             {getStringProp('text', 'Button')}
           </Button>
         );
@@ -80,19 +84,22 @@ export function LivePreview({ component }: LivePreviewProps) {
       case 'container':
         return (
           <div key={`${type}-${depth}`} className="space-y-6">
-            {getStringProp('title') && <h2 className="text-2xl font-bold">{getStringProp('title')}</h2>}
-            {Array.isArray(children) && children.map((child, i) => (
-              <div key={i}>{renderComponent(child, depth + 1)}</div>
-            ))}
+            {getStringProp('title') && (
+              <h2 className="text-2xl font-bold">{getStringProp('title')}</h2>
+            )}
+            {Array.isArray(children) &&
+              children.map((child, i) => <div key={i}>{renderComponent(child, depth + 1)}</div>)}
           </div>
         );
 
       case 'stats-grid':
         return (
-          <div key={`${type}-${depth}`} className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-            {Array.isArray(children) && children.map((child, i) => (
-              <div key={i}>{renderComponent(child, depth + 1)}</div>
-            ))}
+          <div
+            key={`${type}-${depth}`}
+            className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4"
+          >
+            {Array.isArray(children) &&
+              children.map((child, i) => <div key={i}>{renderComponent(child, depth + 1)}</div>)}
           </div>
         );
 
@@ -104,7 +111,9 @@ export function LivePreview({ component }: LivePreviewProps) {
               <CardTitle className="text-3xl">{getStringProp('value')}</CardTitle>
             </CardHeader>
             <CardContent>
-              <p className={`text-sm ${getStringProp('trend') === 'up' ? 'text-green-600' : 'text-red-600'}`}>
+              <p
+                className={`text-sm ${getStringProp('trend') === 'up' ? 'text-green-600' : 'text-red-600'}`}
+              >
                 {getStringProp('change')}
               </p>
             </CardContent>
@@ -117,9 +126,8 @@ export function LivePreview({ component }: LivePreviewProps) {
             key={`${type}-${depth}`}
             className={`grid gap-4 ${getNumberProp('columns') === 3 ? 'grid-cols-1 md:grid-cols-2 lg:grid-cols-3' : 'grid-cols-1 md:grid-cols-2'}`}
           >
-            {Array.isArray(children) && children.map((child, i) => (
-              <div key={i}>{renderComponent(child, depth + 1)}</div>
-            ))}
+            {Array.isArray(children) &&
+              children.map((child, i) => <div key={i}>{renderComponent(child, depth + 1)}</div>)}
           </div>
         );
 
@@ -130,7 +138,7 @@ export function LivePreview({ component }: LivePreviewProps) {
               <CardTitle>{getStringProp('title')}</CardTitle>
               <CardDescription>{getStringProp('description')}</CardDescription>
             </CardHeader>
-            {(Array.isArray(children) && children.length > 0) && (
+            {Array.isArray(children) && children.length > 0 && (
               <CardContent>
                 {children.map((child, i) => (
                   <div key={i}>{renderComponent(child, depth + 1)}</div>
@@ -143,10 +151,11 @@ export function LivePreview({ component }: LivePreviewProps) {
       case 'section':
         return (
           <div key={`${type}-${depth}`} className="space-y-4 border-b pb-6">
-            {getStringProp('title') && <h3 className="text-lg font-semibold">{getStringProp('title')}</h3>}
-            {Array.isArray(children) && children.map((child, i) => (
-              <div key={i}>{renderComponent(child, depth + 1)}</div>
-            ))}
+            {getStringProp('title') && (
+              <h3 className="text-lg font-semibold">{getStringProp('title')}</h3>
+            )}
+            {Array.isArray(children) &&
+              children.map((child, i) => <div key={i}>{renderComponent(child, depth + 1)}</div>)}
           </div>
         );
 
@@ -184,20 +193,16 @@ export function LivePreview({ component }: LivePreviewProps) {
 
       default:
         return (
-          <div key={`${type}-${depth}`} className="p-4 border rounded bg-muted/50">
-            <p className="text-xs text-muted-foreground">
-              Component type: {type}
-            </p>
+          <div key={`${type}-${depth}`} className="rounded border bg-muted/50 p-4">
+            <p className="text-xs text-muted-foreground">Component type: {type}</p>
           </div>
         );
     }
   };
 
   return (
-    <div className="w-full h-full bg-background p-8 overflow-auto">
-      <div className="max-w-7xl mx-auto">
-        {renderComponent(component)}
-      </div>
+    <div className="h-full w-full overflow-auto bg-background p-8">
+      <div className="mx-auto max-w-7xl">{renderComponent(component)}</div>
     </div>
   );
 }

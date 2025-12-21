@@ -74,7 +74,7 @@ export function ThemeSwitcher() {
           {themes.map((themeOption) => {
             const ThemeIcon = themeOption.icon;
             const isSelected = theme === themeOption.value;
-            
+
             return (
               <button
                 key={themeOption.value}
@@ -82,7 +82,7 @@ export function ThemeSwitcher() {
                   setTheme(themeOption.value);
                   setOpen(false);
                 }}
-                className={`flex items-center gap-3 p-3 rounded-lg border-2 transition-colors ${
+                className={`flex items-center gap-3 rounded-lg border-2 p-3 transition-colors ${
                   isSelected
                     ? 'border-primary bg-primary/10'
                     : 'border-border hover:border-primary/50 hover:bg-muted'
@@ -91,13 +91,9 @@ export function ThemeSwitcher() {
                 <ThemeIcon className="h-5 w-5" />
                 <div className="flex-1 text-left">
                   <div className="font-medium">{themeOption.label}</div>
-                  <div className="text-sm text-muted-foreground">
-                    {themeOption.description}
-                  </div>
+                  <div className="text-sm text-muted-foreground">{themeOption.description}</div>
                 </div>
-                {isSelected && (
-                  <div className="h-2 w-2 rounded-full bg-primary" />
-                )}
+                {isSelected && <div className="h-2 w-2 rounded-full bg-primary" />}
               </button>
             );
           })}

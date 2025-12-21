@@ -6,11 +6,7 @@
       "type": "node-terminal",
       "request": "launch",
       "command": "npm run dev",
-      "skipFiles": [
-        "<node_internals>/**",
-        "**/node_modules/**",
-        "**/.next/**"
-      ]
+      "skipFiles": ["<node_internals>/**", "**/node_modules/**", "**/.next/**"]
     },
     {
       "name": "Next.js: debug client-side",
@@ -23,10 +19,7 @@
   "compounds": [
     {
       "name": "MCP UI Studio: Full Stack",
-      "configurations": [
-        "Next.js: debug server-side",
-        "Next.js: debug client-side"
-      ],
+      "configurations": ["Next.js: debug server-side", "Next.js: debug client-side"],
       "stopAll": true,
       "order": 0
     }

@@ -8,7 +8,7 @@ import { useEffect, useState } from 'react';
 const MonacoEditor = dynamic(() => import('@monaco-editor/react'), {
   ssr: false,
   loading: () => (
-    <div className="w-full h-full flex items-center justify-center bg-muted">
+    <div className="flex h-full w-full items-center justify-center bg-muted">
       <p className="text-muted-foreground">Loading editor...</p>
     </div>
   ),
@@ -54,13 +54,13 @@ export function CodeEditor({ code, language, onChange, readOnly = false }: CodeE
       noSyntaxValidation: true,
       noSuggestionDiagnostics: true,
     });
-    
+
     monaco.languages.typescript.javascriptDefaults.setDiagnosticsOptions({
       noSemanticValidation: true,
       noSyntaxValidation: true,
       noSuggestionDiagnostics: true,
     });
-    
+
     // Disable all compiler options that might trigger diagnostics
     monaco.languages.typescript.typescriptDefaults.setCompilerOptions({
       allowNonTsExtensions: true,

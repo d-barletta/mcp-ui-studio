@@ -43,7 +43,7 @@ export function ExportPanel({ content }: ExportPanelProps) {
   };
 
   return (
-    <Card className="min-h-full border-0 md:border shadow-none md:shadow rounded-none md:rounded-xl">
+    <Card className="min-h-full rounded-none border-0 shadow-none md:rounded-xl md:border md:shadow">
       <CardHeader>
         <CardTitle>Export Code</CardTitle>
         <CardDescription>
@@ -58,15 +58,15 @@ export function ExportPanel({ content }: ExportPanelProps) {
             <TabsTrigger value="ruby">Ruby</TabsTrigger>
           </TabsList>
 
-          <TabsContent value="typescript" className="h-[400px] mt-4">
+          <TabsContent value="typescript" className="mt-4 h-[400px]">
             <CodeEditor code={exportCode} language="typescript" readOnly />
           </TabsContent>
 
-          <TabsContent value="python" className="h-[400px] mt-4">
+          <TabsContent value="python" className="mt-4 h-[400px]">
             <CodeEditor code={exportCode} language="python" readOnly />
           </TabsContent>
 
-          <TabsContent value="ruby" className="h-[400px] mt-4">
+          <TabsContent value="ruby" className="mt-4 h-[400px]">
             <CodeEditor code={exportCode} language="ruby" readOnly />
           </TabsContent>
         </Tabs>

@@ -8,7 +8,10 @@ import Link from 'next/link';
 declare global {
   namespace JSX {
     interface IntrinsicElements {
-      'ui-resource-renderer': React.DetailedHTMLProps<React.HTMLAttributes<HTMLElement>, HTMLElement> & {
+      'ui-resource-renderer': React.DetailedHTMLProps<
+        React.HTMLAttributes<HTMLElement>,
+        HTMLElement
+      > & {
         resource?: string;
         'remote-dom-props'?: string;
         'html-props'?: string;
@@ -25,7 +28,22 @@ import { VisualEditor } from '@/components/visual-editor';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { ArrowLeft, Code, Eye, Download, AlertCircle, Terminal, RotateCw, Palette, Github, TrashIcon, Maximize2, Minimize2, Undo, Redo } from 'lucide-react';
+import {
+  ArrowLeft,
+  Code,
+  Eye,
+  Download,
+  AlertCircle,
+  Terminal,
+  RotateCw,
+  Palette,
+  Github,
+  TrashIcon,
+  Maximize2,
+  Minimize2,
+  Undo,
+  Redo,
+} from 'lucide-react';
 import { ThemeSwitcher } from '@/components/theme-switcher';
 import { Logo } from '@/components/logo';
 import { UIResourceRenderer, remoteButtonDefinition, remoteTextDefinition } from '@mcp-ui/client';
@@ -40,16 +58,18 @@ interface ConsoleMessage {
 
 const generateEditorCode = (content: ContentType): string => {
   let contentStr: string;
-  
+
   if (content.type === 'rawHtml') {
     // Format HTML with template literals
     const htmlLines = content.htmlString.split('\n');
-    const indentedHtml = htmlLines.map((line, i) => {
-      if (i === 0 && line.trim() === '') return '';
-      if (i === htmlLines.length - 1 && line.trim() === '') return '    ';
-      return '      ' + line;
-    }).join('\n');
-    
+    const indentedHtml = htmlLines
+      .map((line, i) => {
+        if (i === 0 && line.trim() === '') return '';
+        if (i === htmlLines.length - 1 && line.trim() === '') return '    ';
+        return '      ' + line;
+      })
+      .join('\n');
+
     contentStr = `{ 
     type: 'rawHtml', 
     htmlString: \`
@@ -64,12 +84,14 @@ ${indentedHtml}
   } else {
     // Remote DOM
     const scriptLines = content.script.split('\n');
-    const indentedScript = scriptLines.map((line, i) => {
-      if (i === 0 && line.trim() === '') return '';
-      if (i === scriptLines.length - 1 && line.trim() === '') return '    ';
-      return '      ' + line;
-    }).join('\n');
-    
+    const indentedScript = scriptLines
+      .map((line, i) => {
+        if (i === 0 && line.trim() === '') return '';
+        if (i === scriptLines.length - 1 && line.trim() === '') return '    ';
+        return '      ' + line;
+      })
+      .join('\n');
+
     contentStr = `{ 
     type: 'remoteDom', 
     script: \`
@@ -90,7 +112,7 @@ export default function StudioClient() {
   const params = useParams();
   const router = useRouter();
   const templateId = params.templateId as string;
-  
+
   const [selectedTemplate, setSelectedTemplate] = useState<Template | null>(null);
   const [editedContent, setEditedContent] = useState<ContentType | null>(null);
   const [editorCode, setEditorCode] = useState<string>('');
@@ -115,7 +137,7 @@ export default function StudioClient() {
 
   useEffect(() => {
     if (templateId) {
-      const template = templates.find(t => t.id === templateId);
+      const template = templates.find((t) => t.id === templateId);
       if (template) {
         setSelectedTemplate(template);
         setEditedContent(template.content);
@@ -128,7 +150,7 @@ export default function StudioClient() {
   }, [templateId, router]);
 
   const handleRefresh = () => {
-    setRefreshKey(prev => prev + 1);
+    setRefreshKey((prev) => prev + 1);
     setConsoleMessages([]);
     setUnreadCount(0);
   };
@@ -143,11 +165,11 @@ export default function StudioClient() {
       id: messageIdCounter.current,
       timestamp: new Date(),
       type,
-      data
+      data,
     };
-    setConsoleMessages(prev => [...prev, message]);
+    setConsoleMessages((prev) => [...prev, message]);
     if (rightPanelTab !== 'console') {
-      setUnreadCount(prev => prev + 1);
+      setUnreadCount((prev) => prev + 1);
     }
   };
 
@@ -204,20 +226,20 @@ export default function StudioClient() {
   const handleContentChange = (value: string | undefined) => {
     if (!value) return;
     setEditorCode(value);
-    
+
     try {
       // Use Function constructor to parse the JS object literal safely
       // This handles comments, trailing commas, different quoting styles, etc.
       const parseConfig = new Function(`return ${value}`);
       const parsedConfig = parseConfig();
-      
+
       if (!parsedConfig || !parsedConfig.content) {
         setContentError('Invalid MCP-UI schema: missing content object');
         return;
       }
-      
+
       const content = parsedConfig.content;
-      
+
       // Basic MCP-UI schema validation
       if (!content.type) {
         setContentError('Invalid MCP-UI schema: content.type is required');
@@ -231,7 +253,7 @@ export default function StudioClient() {
       if (typeof content.script === 'string') {
         content.script = content.script.trim();
       }
-      
+
       // Update the content - let the preview handle rendering
       setEditedContent(content as ContentType);
       setContentError(null);
@@ -242,7 +264,11 @@ export default function StudioClient() {
     }
   };
 
-  const handleVisualEditorChange = (config: { content: ContentType; uri: string; encoding: 'text' | 'blob' }) => {
+  const handleVisualEditorChange = (config: {
+    content: ContentType;
+    uri: string;
+    encoding: 'text' | 'blob';
+  }) => {
     setEditedContent(config.content);
     setEditorCode(generateEditorCode(config.content));
     setContentError(null);
@@ -256,11 +282,16 @@ export default function StudioClient() {
   const currentContent = editedContent || selectedTemplate.content;
 
   return (
-    <main className="h-screen flex flex-col bg-background">
+    <main className="flex h-screen flex-col bg-background">
       {/* Header */}
-      <header className="border-b px-4 py-3 flex items-center justify-between gap-4">
+      <header className="flex items-center justify-between gap-4 border-b px-4 py-3">
         <div className="flex items-center gap-4">
-          <Button variant="ghost" size="icon" onClick={handleBackToGallery} className="shrink-0 aspect-square">
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={handleBackToGallery}
+            className="aspect-square shrink-0"
+          >
             <ArrowLeft className="h-4 w-4" />
           </Button>
           <div>
@@ -269,14 +300,10 @@ export default function StudioClient() {
           </div>
         </div>
         <div className="flex items-center gap-1">
-          <Button 
-            variant="ghost" 
-            size="icon"
-            asChild
-          >
-            <a 
-              href="https://github.com/d-barletta/mcp-ui-studio" 
-              target="_blank" 
+          <Button variant="ghost" size="icon" asChild>
+            <a
+              href="https://github.com/d-barletta/mcp-ui-studio"
+              target="_blank"
               rel="noopener noreferrer"
               aria-label="View on GitHub"
             >
@@ -284,92 +311,98 @@ export default function StudioClient() {
             </a>
           </Button>
           <ThemeSwitcher />
-          <Link href="/" className="h-9 w-9 md:pl-2 md:w-auto md:h-auto justify-center flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors">
-            <Logo className="h-4 w-4 shrink-0 aspect-square" />
-            <span className="text-sm hidden md:inline">MCP UI Studio</span>
+          <Link
+            href="/"
+            className="flex h-9 w-9 items-center justify-center gap-2 text-muted-foreground transition-colors hover:text-foreground md:h-auto md:w-auto md:pl-2"
+          >
+            <Logo className="aspect-square h-4 w-4 shrink-0" />
+            <span className="hidden text-sm md:inline">MCP UI Studio</span>
           </Link>
         </div>
       </header>
 
       {/* Main Content */}
       <div className="flex-1 overflow-hidden">
-        <Tabs defaultValue="preview" className="h-full flex flex-col">
-          <div className="border-b p-4 bg-muted">
+        <Tabs defaultValue="preview" className="flex h-full flex-col">
+          <div className="border-b bg-muted p-4">
             <TabsList>
               <TabsTrigger value="preview">
-                <Eye className="h-4 w-4 mr-2" />
+                <Eye className="mr-2 h-4 w-4" />
                 Split View
               </TabsTrigger>
               <TabsTrigger value="code">
-                <Code className="h-4 w-4 mr-2" />
+                <Code className="mr-2 h-4 w-4" />
                 Code Editor
               </TabsTrigger>
               <TabsTrigger value="export">
-                <Download className="h-4 w-4 mr-2" />
+                <Download className="mr-2 h-4 w-4" />
                 Export
               </TabsTrigger>
             </TabsList>
           </div>
 
-          <TabsContent value="preview" className="flex-1 min-h-0 m-0">
-            <div className={`h-full min-h-0 grid lg:grid-rows-none lg:grid-cols-2 divide-y lg:divide-y-0 lg:divide-x ${isMaximized ? 'grid-rows-1' : 'grid-rows-2'}`}>
+          <TabsContent value="preview" className="m-0 min-h-0 flex-1">
+            <div
+              className={`grid h-full min-h-0 divide-y lg:grid-cols-2 lg:grid-rows-none lg:divide-x lg:divide-y-0 ${isMaximized ? 'grid-rows-1' : 'grid-rows-2'}`}
+            >
               {/* Preview Panel */}
               <div className={`h-full overflow-hidden ${isMaximized ? 'hidden lg:block' : ''}`}>
                 <div className="h-full p-4">
                   {currentContent.type === 'rawHtml' && (
-                    <div className="w-full h-full border border-border rounded-lg bg-white overflow-auto">
+                    <div className="h-full w-full overflow-auto rounded-lg border border-border bg-white">
                       <ui-resource-renderer
-                        class="w-full h-full block"
+                        class="block h-full w-full"
                         ref={rendererRef}
                         key={`${currentContent.htmlString}-${refreshKey}`}
                         resource={JSON.stringify({
                           uri: 'ui://preview/html',
                           mimeType: 'text/html',
-                          text: currentContent.htmlString
+                          text: currentContent.htmlString,
                         })}
                         html-props={JSON.stringify({
-                          sandboxPermissions: 'allow-scripts allow-forms allow-modals allow-popups'
+                          sandboxPermissions: 'allow-scripts allow-forms allow-modals allow-popups',
                         })}
                       ></ui-resource-renderer>
                     </div>
                   )}
                   {currentContent.type === 'externalUrl' && (
-                    <div className="w-full h-full border border-border rounded-lg bg-white overflow-auto">
+                    <div className="h-full w-full overflow-auto rounded-lg border border-border bg-white">
                       <ui-resource-renderer
-                        class="w-full h-full block"
+                        class="block h-full w-full"
                         ref={rendererRef}
                         key={`${currentContent.iframeUrl}-${refreshKey}`}
                         resource={JSON.stringify({
                           uri: 'ui://preview/url',
                           mimeType: 'text/uri-list',
-                          text: currentContent.iframeUrl
+                          text: currentContent.iframeUrl,
                         })}
                         html-props={JSON.stringify({
-                          sandboxPermissions: 'allow-scripts allow-forms allow-same-origin allow-modals allow-popups'
+                          sandboxPermissions:
+                            'allow-scripts allow-forms allow-same-origin allow-modals allow-popups',
                         })}
                       ></ui-resource-renderer>
                     </div>
                   )}
                   {currentContent.type === 'remoteDom' && (
-                    <div className="h-full border border-border rounded-lg text-slate-100 p-4 flex flex-col">
-                      <div className="text-xs text-slate-300 mb-4 flex items-center justify-between">
+                    <div className="flex h-full flex-col rounded-lg border border-border p-4 text-slate-100">
+                      <div className="mb-4 flex items-center justify-between text-xs text-slate-300">
                         <span>Remote DOM Preview</span>
-                        <span className="text-[10px] px-2 py-1 bg-green-200 text-green-800 rounded">
+                        <span className="rounded bg-green-200 px-2 py-1 text-[10px] text-green-800">
                           LIVE
                         </span>
                       </div>
                       <div className="flex-1 overflow-auto rounded border">
                         <ui-resource-renderer
-                          class="w-full h-full block"
+                          class="block h-full w-full"
                           ref={rendererRef}
                           key={`${currentContent.script}-${currentContent.framework}-${refreshKey}`}
                           resource={JSON.stringify({
                             uri: 'ui://remote-component/preview',
                             mimeType: `application/vnd.mcp-ui.remote-dom`,
-                            text: currentContent.script
+                            text: currentContent.script,
                           })}
                           remote-dom-props={JSON.stringify({
-                            remoteElements: [remoteButtonDefinition, remoteTextDefinition]
+                            remoteElements: [remoteButtonDefinition, remoteTextDefinition],
                           })}
                         ></ui-resource-renderer>
                       </div>
@@ -379,43 +412,43 @@ export default function StudioClient() {
               </div>
 
               {/* Right Panel with Tabs */}
-              <div className="h-full min-h-0 flex flex-col">
+              <div className="flex h-full min-h-0 flex-col">
                 <div className="border-b bg-muted/50">
                   <div className="flex">
                     <button
                       onClick={() => setRightPanelTab('visual')}
                       className={`flex-1 px-4 py-3 text-sm font-medium transition-colors ${
                         rightPanelTab === 'visual'
-                          ? 'bg-background border-b-2 border-primary text-foreground'
+                          ? 'border-b-2 border-primary bg-background text-foreground'
                           : 'text-muted-foreground hover:text-foreground'
                       }`}
                     >
-                      <Palette className="h-4 w-4 inline-block mr-2" />
+                      <Palette className="mr-2 inline-block h-4 w-4" />
                       Visual
                     </button>
                     <button
                       onClick={() => setRightPanelTab('editor')}
                       className={`flex-1 px-4 py-3 text-sm font-medium transition-colors ${
                         rightPanelTab === 'editor'
-                          ? 'bg-background border-b-2 border-primary text-foreground'
+                          ? 'border-b-2 border-primary bg-background text-foreground'
                           : 'text-muted-foreground hover:text-foreground'
                       }`}
                     >
-                      <Code className="h-4 w-4 inline-block mr-2" />
+                      <Code className="mr-2 inline-block h-4 w-4" />
                       Editor
                     </button>
                     <button
                       onClick={() => setRightPanelTab('console')}
-                      className={`flex-1 px-4 py-3 text-sm font-medium transition-colors relative whitespace-nowrap ${
+                      className={`relative flex-1 whitespace-nowrap px-4 py-3 text-sm font-medium transition-colors ${
                         rightPanelTab === 'console'
-                          ? 'bg-background border-b-2 border-primary text-foreground'
+                          ? 'border-b-2 border-primary bg-background text-foreground'
                           : 'text-muted-foreground hover:text-foreground'
                       }`}
                     >
-                      <Terminal className="h-4 w-4 inline-block mr-2" />
+                      <Terminal className="mr-2 inline-block h-4 w-4" />
                       Console
                       {unreadCount > 0 && rightPanelTab !== 'console' && (
-                        <span className="ml-2 inline-flex items-center justify-center h-5 w-5 text-xs font-bold text-white bg-red-500 rounded-full">
+                        <span className="ml-2 inline-flex h-5 w-5 items-center justify-center rounded-full bg-red-500 text-xs font-bold text-white">
                           {unreadCount}
                         </span>
                       )}
@@ -424,11 +457,11 @@ export default function StudioClient() {
                 </div>
 
                 {rightPanelTab === 'visual' && (
-                  <div className="flex-1 min-h-0 flex flex-col">
-                    <div className="p-4 border-b bg-muted/50 flex items-center justify-between">
+                  <div className="flex min-h-0 flex-1 flex-col">
+                    <div className="flex items-center justify-between border-b bg-muted/50 p-4">
                       <div>
                         <h3 className="font-semibold">Visual Editor</h3>
-                        <p className="text-xs text-muted-foreground mt-1">
+                        <p className="mt-1 text-xs text-muted-foreground">
                           Configure UI properties
                         </p>
                       </div>
@@ -456,13 +489,17 @@ export default function StudioClient() {
                           size="sm"
                           className="lg:hidden"
                           onClick={() => setIsMaximized(!isMaximized)}
-                          title={isMaximized ? "Minimize" : "Maximize"}
+                          title={isMaximized ? 'Minimize' : 'Maximize'}
                         >
-                          {isMaximized ? <Minimize2 className="h-4 w-4" /> : <Maximize2 className="h-4 w-4" />}
+                          {isMaximized ? (
+                            <Minimize2 className="h-4 w-4" />
+                          ) : (
+                            <Maximize2 className="h-4 w-4" />
+                          )}
                         </Button>
                       </div>
                     </div>
-                    <div className="flex-1 min-h-0 overflow-auto">
+                    <div className="min-h-0 flex-1 overflow-auto">
                       <VisualEditor
                         ref={visualEditorRef}
                         content={currentContent}
@@ -479,11 +516,11 @@ export default function StudioClient() {
                 )}
 
                 {rightPanelTab === 'editor' && (
-                  <div className="flex-1 min-h-0 flex flex-col">
-                    <div className="p-4 border-b bg-muted/50 flex items-center justify-between">
+                  <div className="flex min-h-0 flex-1 flex-col">
+                    <div className="flex items-center justify-between border-b bg-muted/50 p-4">
                       <div>
                         <h3 className="font-semibold">createUIResource Options</h3>
-                        <p className="text-xs text-muted-foreground mt-1">
+                        <p className="mt-1 text-xs text-muted-foreground">
                           Edit options object (live preview)
                         </p>
                       </div>
@@ -493,9 +530,13 @@ export default function StudioClient() {
                           size="sm"
                           className="lg:hidden"
                           onClick={() => setIsMaximized(!isMaximized)}
-                          title={isMaximized ? "Minimize" : "Maximize"}
+                          title={isMaximized ? 'Minimize' : 'Maximize'}
                         >
-                          {isMaximized ? <Minimize2 className="h-4 w-4" /> : <Maximize2 className="h-4 w-4" />}
+                          {isMaximized ? (
+                            <Minimize2 className="h-4 w-4" />
+                          ) : (
+                            <Maximize2 className="h-4 w-4" />
+                          )}
                         </Button>
                         <Button
                           variant="ghost"
@@ -506,14 +547,14 @@ export default function StudioClient() {
                           <RotateCw className="h-3 w-3" />
                         </Button>
                         {contentError && (
-                          <div className="flex items-center gap-2 text-destructive text-xs">
+                          <div className="flex items-center gap-2 text-xs text-destructive">
                             <AlertCircle className="h-4 w-4" />
                             <span>{contentError}</span>
                           </div>
                         )}
                       </div>
                     </div>
-                    <div className="flex-1 min-h-0 overflow-hidden">
+                    <div className="min-h-0 flex-1 overflow-hidden">
                       <CodeEditor
                         code={editorCode}
                         language="typescript"
@@ -524,24 +565,28 @@ export default function StudioClient() {
                 )}
 
                 {rightPanelTab === 'console' && (
-                  <div className="flex-1 min-h-0 flex flex-col">
-                    <div className="p-4 border-b bg-muted/50 flex items-center justify-between">
+                  <div className="flex min-h-0 flex-1 flex-col">
+                    <div className="flex items-center justify-between border-b bg-muted/50 p-4">
                       <div>
                         <h3 className="font-semibold">Console</h3>
-                        <p className="text-xs text-muted-foreground mt-1">
+                        <p className="mt-1 text-xs text-muted-foreground">
                           UI actions and events log
                         </p>
                       </div>
-                  
+
                       <div className="flex items-center gap-2">
                         <Button
                           variant="ghost"
                           size="sm"
                           className="lg:hidden"
                           onClick={() => setIsMaximized(!isMaximized)}
-                          title={isMaximized ? "Minimize" : "Maximize"}
+                          title={isMaximized ? 'Minimize' : 'Maximize'}
                         >
-                          {isMaximized ? <Minimize2 className="h-4 w-4" /> : <Maximize2 className="h-4 w-4" />}
+                          {isMaximized ? (
+                            <Minimize2 className="h-4 w-4" />
+                          ) : (
+                            <Maximize2 className="h-4 w-4" />
+                          )}
                         </Button>
                         <Button
                           variant="ghost"
@@ -553,29 +598,26 @@ export default function StudioClient() {
                         </Button>
                       </div>
                     </div>
-                    <div className="flex-1 min-h-0 overflow-auto">
-                      <div className="p-4 font-mono text-xs space-y-2">
+                    <div className="min-h-0 flex-1 overflow-auto">
+                      <div className="space-y-2 p-4 font-mono text-xs">
                         {consoleMessages.length === 0 ? (
-                          <div className="text-muted-foreground text-center py-8">
+                          <div className="py-8 text-center text-muted-foreground">
                             No messages yet. Interact with the preview to see logs.
                           </div>
                         ) : (
                           consoleMessages.map((msg) => (
-                            <div
-                              key={msg.id}
-                              className="border-b border-border pb-2 last:border-0"
-                            >
-                              <div className="flex items-center gap-2 mb-1">
+                            <div key={msg.id} className="border-b border-border pb-2 last:border-0">
+                              <div className="mb-1 flex items-center gap-2">
                                 <span className="text-muted-foreground">
                                   {msg.timestamp.toLocaleTimeString()}
                                 </span>
                                 <span
-                                  className={`px-2 py-0.5 rounded text-xs font-semibold ${
+                                  className={`rounded px-2 py-0.5 text-xs font-semibold ${
                                     msg.type === 'action'
                                       ? 'bg-blue-500/10 text-blue-500'
                                       : msg.type === 'error'
-                                      ? 'bg-red-500/10 text-red-500'
-                                      : 'bg-gray-500/10 text-gray-500'
+                                        ? 'bg-red-500/10 text-red-500'
+                                        : 'bg-gray-500/10 text-gray-500'
                                   }`}
                                 >
                                   {msg.type}
@@ -596,23 +638,23 @@ export default function StudioClient() {
             </div>
           </TabsContent>
 
-          <TabsContent value="code" className="flex-1 m-0">
-            <div className="h-full flex flex-col">
-              <div className="p-4 border-b bg-muted/50 flex items-center justify-between">
+          <TabsContent value="code" className="m-0 flex-1">
+            <div className="flex h-full flex-col">
+              <div className="flex items-center justify-between border-b bg-muted/50 p-4">
                 <div>
                   <h3 className="font-semibold">createUIResource Options</h3>
-                  <p className="text-xs text-muted-foreground mt-1">
+                  <p className="mt-1 text-xs text-muted-foreground">
                     Edit options object (full screen)
                   </p>
                 </div>
                 {contentError && (
-                  <div className="flex items-center gap-2 text-destructive text-xs">
+                  <div className="flex items-center gap-2 text-xs text-destructive">
                     <AlertCircle className="h-4 w-4" />
                     <span>{contentError}</span>
                   </div>
                 )}
               </div>
-              <div className="flex-1 min-h-0">
+              <div className="min-h-0 flex-1">
                 <CodeEditor
                   code={editorCode}
                   language="typescript"
@@ -622,9 +664,9 @@ export default function StudioClient() {
             </div>
           </TabsContent>
 
-          <TabsContent value="export" className="flex-1 min-h-0 m-0 p-0">
+          <TabsContent value="export" className="m-0 min-h-0 flex-1 p-0">
             <ScrollArea className="h-full">
-              <div className="p-0 md:p-8 max-w-4xl mx-auto">
+              <div className="mx-auto max-w-4xl p-0 md:p-8">
                 <ExportPanel content={currentContent} />
               </div>
             </ScrollArea>

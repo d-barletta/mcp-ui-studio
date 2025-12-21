@@ -1,9 +1,11 @@
 # MCP UI Studio - Complete Project Initialization Prompt
 
 ## Project Overview
+
 Create **MCP UI Studio**, the professional visual development environment for building MCP-UI interactive interfaces. This tool bridges traditional UI component libraries (Shadcn, Material UI, Tailwind) and MCP-UI server implementations, enabling developers to design, test, preview, and export production-ready MCP-UI handlers through an intuitive visual interface.
 
 ## Core Value Proposition
+
 **"The Visual Workshop for MCP-UI Development"**
 
 Transform any UI component into production MCP-UI code in seconds. Visual interface builder + template library + framework converter + live preview + multi-language export.
@@ -13,6 +15,7 @@ Transform any UI component into production MCP-UI code in seconds. Visual interf
 ## Tech Stack
 
 ### Frontend
+
 - **Framework**: Next.js 14 (App Router) + TypeScript 5.x
 - **Styling**: Tailwind CSS 3.x + shadcn/ui
 - **State**: Zustand 4.x
@@ -22,6 +25,7 @@ Transform any UI component into production MCP-UI code in seconds. Visual interf
 - **Animations**: Framer Motion
 
 ### Key Dependencies
+
 ```bash
 npm install next react react-dom typescript tailwindcss
 npm install @mcp-ui/client zustand @monaco-editor/react
@@ -84,10 +88,13 @@ mcp-ui-studio/
 ## Implementation Roadmap (8 Weeks)
 
 ### 🎯 Phase 1: Foundation (Week 1-2)
+
 **Goal**: Working template gallery with live preview
 
 #### Core Tasks:
+
 1. **Project Setup**
+
    ```bash
    npx create-next-app@latest mcp-ui-studio --typescript --tailwind --app
    cd mcp-ui-studio
@@ -119,9 +126,11 @@ mcp-ui-studio/
 ---
 
 ### 🚀 Phase 2: Code Editor & Export (Week 3-4)
+
 **Goal**: View and export MCP-UI code in multiple languages
 
 #### Core Tasks:
+
 1. **Monaco Editor Integration**
    - Setup with TypeScript/Python/Ruby syntax
    - Custom MCP-UI syntax highlighting
@@ -152,9 +161,11 @@ mcp-ui-studio/
 ---
 
 ### 🎨 Phase 3: Framework Bridge (Week 5-6)
+
 **Goal**: Convert existing components to MCP-UI
 
 #### Core Tasks:
+
 1. **Component Parsers**
    - Shadcn/ui parser: Extract JSX elements, props, structure
    - HTML/Tailwind parser: Parse DOM, extract classes
@@ -183,9 +194,11 @@ mcp-ui-studio/
 ---
 
 ### 🎯 Phase 4: Visual Builder (Week 7-8)
+
 **Goal**: No-code drag-and-drop interface builder
 
 #### Core Tasks:
+
 1. **Drag-Drop System**
    - Field palette with draggable types
    - Drop zone canvas
@@ -230,12 +243,12 @@ export interface Template {
   name: string;
   description: string;
   category: 'forms' | 'dashboards' | 'wizards' | 'interactive' | 'data-display';
-  preview: string;              // Preview emoji/icon
-  thumbnail: string;            // Screenshot URL
+  preview: string; // Preview emoji/icon
+  thumbnail: string; // Screenshot URL
   tags: string[];
   difficulty: 'beginner' | 'intermediate' | 'advanced';
-  html: string;                 // HTML preview code
-  mcpHandler: string;           // MCP-UI handler code
+  html: string; // HTML preview code
+  mcpHandler: string; // MCP-UI handler code
   metadata: {
     fields: Field[];
     actions: Action[];
@@ -246,7 +259,16 @@ export interface Template {
 }
 
 export interface Field {
-  type: 'text' | 'email' | 'password' | 'textarea' | 'select' | 'checkbox' | 'file' | 'date' | 'rating';
+  type:
+    | 'text'
+    | 'email'
+    | 'password'
+    | 'textarea'
+    | 'select'
+    | 'checkbox'
+    | 'file'
+    | 'date'
+    | 'rating';
   name: string;
   label: string;
   placeholder?: string;
@@ -261,9 +283,9 @@ export interface Action {
 }
 
 export interface ExportBundle {
-  handler: string;              // Generated code
-  packageJson?: object;         // Package dependencies
-  readme?: string;              // Usage documentation
+  handler: string; // Generated code
+  packageJson?: object; // Package dependencies
+  readme?: string; // Usage documentation
 }
 ```
 
@@ -277,21 +299,21 @@ interface StudioState {
   // Active template
   activeTemplate: Template | null;
   setActiveTemplate: (template: Template | null) => void;
-  
+
   // Editor preferences
   editorLanguage: 'typescript' | 'python' | 'ruby';
   setEditorLanguage: (lang: string) => void;
-  
+
   // Preview settings
   previewWidth: number;
   previewTheme: 'light' | 'dark';
-  
+
   // Builder state
   builderFields: Field[];
   addField: (field: Field) => void;
   updateField: (id: string, updates: Partial<Field>) => void;
   removeField: (id: string) => void;
-  
+
   // User data
   recentTemplates: string[];
   favoriteTemplates: string[];
@@ -304,12 +326,13 @@ interface StudioState {
 ## Design System
 
 ### Brand Colors
+
 ```css
 :root {
-  --brand-primary: #3b82f6;      /* Blue */
-  --brand-secondary: #8b5cf6;    /* Purple */
-  --brand-accent: #ec4899;       /* Pink */
-  
+  --brand-primary: #3b82f6; /* Blue */
+  --brand-secondary: #8b5cf6; /* Purple */
+  --brand-accent: #ec4899; /* Pink */
+
   --success: #10b981;
   --error: #ef4444;
   --warning: #f59e0b;
@@ -317,12 +340,14 @@ interface StudioState {
 ```
 
 ### Typography
+
 - **Sans**: Inter (UI text)
 - **Mono**: JetBrains Mono (code)
 - **Headings**: 42px/32px/24px (xl/lg/md)
 - **Body**: 16px/14px (base/sm)
 
 ### Spacing
+
 - Use 8px grid system
 - Border radius: 8px/12px/16px
 - Shadows: subtle elevation
@@ -333,6 +358,7 @@ interface StudioState {
 ## User Flows
 
 ### Flow 1: Template Quick Start (< 60 seconds)
+
 ```
 1. Land on homepage → Click "Start Building"
 2. Browse templates → Select "Login Form"
@@ -342,6 +368,7 @@ interface StudioState {
 ```
 
 ### Flow 2: Component Conversion (< 3 minutes)
+
 ```
 1. Have existing Shadcn form
 2. Go to "Framework Bridge"
@@ -353,6 +380,7 @@ interface StudioState {
 ```
 
 ### Flow 3: Visual Builder (< 10 minutes)
+
 ```
 1. Open "Component Builder"
 2. Drag fields from palette
@@ -367,6 +395,7 @@ interface StudioState {
 ## Feature Priority Matrix
 
 ### Must Have (MVP - Week 8)
+
 - ✅ 15+ production-ready templates
 - ✅ Live preview with theme toggle
 - ✅ Export to TypeScript/Python/Ruby
@@ -376,6 +405,7 @@ interface StudioState {
 - ✅ Template search & filters
 
 ### Should Have (Post-MVP)
+
 - 🔄 Visual drag-drop builder
 - 🔄 User accounts & saved projects
 - 🔄 Template marketplace
@@ -384,6 +414,7 @@ interface StudioState {
 - 🔄 CLI tool
 
 ### Nice to Have (Future)
+
 - 💡 Real-time collaboration
 - 💡 Component analytics
 - 💡 A/B testing tools
@@ -395,6 +426,7 @@ interface StudioState {
 ## Success Metrics
 
 ### Launch Targets (Week 8)
+
 - **Performance**: < 3s preview load time
 - **Templates**: 15+ ready-to-use
 - **Export formats**: 3 languages
@@ -403,6 +435,7 @@ interface StudioState {
 - **Mobile**: Fully responsive 375px+
 
 ### Growth Metrics (3 months)
+
 - **Users**: 1,000+ unique visitors
 - **Exports**: 500+ code exports
 - **Templates**: 30+ in library
@@ -414,6 +447,7 @@ interface StudioState {
 ## Getting Started
 
 ### Initialization Commands
+
 ```bash
 # Create project
 npx create-next-app@latest mcp-ui-studio --typescript --tailwind --app
@@ -433,6 +467,7 @@ npm run dev
 ```
 
 ### First Steps
+
 1. Setup folder structure as outlined
 2. Create base layout components
 3. Build template data structure (10 templates)
@@ -449,6 +484,7 @@ npm run dev
 ## Technical Considerations
 
 ### Security
+
 - Sanitize all user input
 - Sandbox iframe with strict CSP: `sandbox="allow-scripts"`
 - No eval() or Function() usage
@@ -456,6 +492,7 @@ npm run dev
 - Validate generated code before export
 
 ### Performance
+
 - Lazy load Monaco Editor (dynamic import)
 - Virtual scrolling for template gallery
 - Debounce preview updates (300ms)
@@ -464,6 +501,7 @@ npm run dev
 - Cache templates in localStorage
 
 ### Accessibility
+
 - Keyboard navigation (Tab, Enter, Escape)
 - ARIA labels on all interactive elements
 - Focus management in modals
@@ -472,6 +510,7 @@ npm run dev
 - Skip links for main content
 
 ### Browser Support
+
 - Chrome/Edge 90+
 - Firefox 88+
 - Safari 14+
@@ -505,13 +544,14 @@ docs/
 export const siteConfig = {
   name: 'MCP UI Studio',
   tagline: 'The Visual Workshop for MCP-UI Development',
-  description: 'Build, preview, and export MCP-UI interfaces visually. Transform any component into production-ready MCP handlers in seconds.',
+  description:
+    'Build, preview, and export MCP-UI interfaces visually. Transform any component into production-ready MCP handlers in seconds.',
   url: 'https://mcpuistudio.com',
   links: {
     github: 'https://github.com/yourusername/mcp-ui-studio',
     docs: 'https://mcpuistudio.com/docs',
-    twitter: 'https://twitter.com/mcpuistudio'
-  }
+    twitter: 'https://twitter.com/mcpuistudio',
+  },
 };
 ```
 
@@ -520,6 +560,7 @@ export const siteConfig = {
 ## Sample Templates to Create
 
 ### Forms (5 templates)
+
 1. **Login Form** - Email + password with remember me
 2. **Feedback Widget** - Star rating + comments
 3. **File Upload** - Drag-drop with progress
@@ -527,16 +568,19 @@ export const siteConfig = {
 5. **Survey Form** - Multiple choice + text
 
 ### Dashboards (3 templates)
+
 1. **Stats Cards** - KPI metrics with trends
 2. **Data Table** - Sortable, filterable table
 3. **Analytics Panel** - Charts + graphs
 
 ### Wizards (3 templates)
+
 1. **Onboarding** - 3-step user setup
 2. **Checkout Flow** - Cart → Shipping → Payment
 3. **Setup Wizard** - Configuration steps
 
 ### Interactive (4 templates)
+
 1. **Rating Widget** - 5-star with feedback
 2. **Poll Creator** - Multiple choice voting
 3. **Quiz Builder** - Questions with answers
@@ -547,24 +591,28 @@ export const siteConfig = {
 ## Implementation Priority
 
 ### Week 1-2 Focus
+
 - Project setup + structure
 - Template data (10 templates)
 - Gallery UI with filters
 - Live preview iframe
 
 ### Week 3-4 Focus
+
 - Monaco Editor integration
 - TypeScript generator
 - Python/Ruby generators
 - Export modal UI
 
 ### Week 5-6 Focus
+
 - Shadcn parser
 - HTML parser
 - Framework Bridge UI
 - Conversion testing
 
 ### Week 7-8 Focus
+
 - Visual builder foundation
 - Drag-drop system
 - Properties panel
@@ -575,6 +623,7 @@ export const siteConfig = {
 ## Launch Checklist
 
 ### Pre-Launch
+
 - [ ] All 15 templates complete and tested
 - [ ] Export working for all 3 languages
 - [ ] Framework Bridge handles edge cases
@@ -587,6 +636,7 @@ export const siteConfig = {
 - [ ] Analytics integrated
 
 ### Launch Day
+
 - [ ] Deploy to Vercel
 - [ ] Post on Product Hunt
 - [ ] Share on Twitter/LinkedIn
@@ -595,6 +645,7 @@ export const siteConfig = {
 - [ ] Submit to directories
 
 ### Post-Launch (Week 9+)
+
 - [ ] Gather user feedback
 - [ ] Fix critical bugs
 - [ ] Add most-requested features
@@ -604,6 +655,7 @@ export const siteConfig = {
 ---
 
 ## License & Attribution
+
 - **License**: MIT License
 - **Credit**: Built for the MCP-UI ecosystem
 - **Open Source**: Contributions welcome

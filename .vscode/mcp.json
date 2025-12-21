@@ -1,9 +1,9 @@
 {
-	"servers": {
-		"mcp-ui": {
-			"url": "https://gitmcp.io/idosal/mcp-ui",
-			"type": "http"
-		}
-	},
-	"inputs": []
+  "servers": {
+    "mcp-ui": {
+      "url": "https://gitmcp.io/idosal/mcp-ui",
+      "type": "http"
+    }
+  },
+  "inputs": []
 }

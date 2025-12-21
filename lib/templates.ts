@@ -8,14 +8,14 @@ export const templates: Template[] = [
     category: 'Dashboards',
     content: {
       type: 'externalUrl',
-      iframeUrl: 'https://example.com/analytics'
+      iframeUrl: 'https://example.com/analytics',
     },
     previewCode: `{
   "type": "iframe",
   "props": {
     "url": "https://example.com/analytics"
   }
-}`
+}`,
   },
   {
     id: 'contact-form',
@@ -82,7 +82,7 @@ export const templates: Template[] = [
     });
   </script>
 </body>
-</html>`
+</html>`,
     },
     previewCode: `<form id="contactForm">
   <h1>Contact Us</h1>
@@ -90,7 +90,7 @@ export const templates: Template[] = [
   <input type="email" placeholder="Email" required>
   <textarea placeholder="Message"></textarea>
   <button type="submit">Send</button>
-</form>`
+</form>`,
   },
   {
     id: 'login-form',
@@ -166,7 +166,7 @@ export const templates: Template[] = [
     }
   </script>
 </body>
-</html>`
+</html>`,
     },
     previewCode: `<form id="loginForm">
   <h1>Welcome Back</h1>
@@ -174,7 +174,7 @@ export const templates: Template[] = [
   <input type="password" placeholder="••••••••" required>
   <label><input type="checkbox"> Remember me</label>
   <button type="submit">Sign In</button>
-</form>`
+</form>`,
   },
   {
     id: 'remote-dom-button',
@@ -189,7 +189,7 @@ button.addEventListener('press', () => {
   window.parent.postMessage({ type: 'tool', payload: { toolName: 'uiInteraction', params: { action: 'button-click', from: 'remote-dom' } } }, '*');
 });
 root.appendChild(button);`,
-      framework: 'react'
+      framework: 'react',
     },
     previewCode: `const button = document.createElement('ui-button');
 button.setAttribute('label', 'Click me!');
@@ -202,6 +202,6 @@ button.addEventListener('press', () => {
     } 
   }, '*');
 });
-root.appendChild(button);`
-  }
+root.appendChild(button);`,
+  },
 ];
