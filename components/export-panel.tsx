@@ -43,7 +43,7 @@ export function ExportPanel({ content }: ExportPanelProps) {
   };
 
   return (
-    <Card className="h-full">
+    <Card className="h-full border-0 md:border shadow-none md:shadow rounded-none md:rounded-xl">
       <CardHeader>
         <CardTitle>Export Code</CardTitle>
         <CardDescription>

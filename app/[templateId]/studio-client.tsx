@@ -553,7 +553,7 @@ export default function StudioClient() {
 
           <TabsContent value="export" className="flex-1 m-0 p-0">
             <ScrollArea className="h-full">
-              <div className="p-8 max-w-4xl mx-auto">
+              <div className="p-0 md:p-8 max-w-4xl mx-auto">
                 <ExportPanel content={currentContent} />
               </div>
             </ScrollArea>

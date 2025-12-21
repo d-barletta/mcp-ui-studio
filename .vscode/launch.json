@@ -18,17 +18,6 @@
       "request": "launch",
       "url": "http://localhost:3000",
       "webRoot": "${workspaceFolder}"
-    },
-    {
-      "name": "Next.js: debug full stack",
-      "type": "node-terminal",
-      "request": "launch",
-      "command": "npm run dev",
-      "skipFiles": [
-        "<node_internals>/**",
-        "**/node_modules/**",
-        "**/.next/**"
-      ]
     }
   ],
   "compounds": [
@@ -38,7 +27,8 @@
         "Next.js: debug server-side",
         "Next.js: debug client-side"
       ],
-      "stopAll": true
+      "stopAll": true,
+      "order": 0
     }
   ]
 }
