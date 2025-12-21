@@ -5,9 +5,10 @@ import dynamic from 'next/dynamic';
 import { ContentType } from '@/lib/types';
 import { Label } from './ui/label';
 import { Input } from './ui/input';
+import { Button } from './ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/select';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from './ui/card';
-import { AlertCircle } from 'lucide-react';
+import { AlertCircle, Maximize2, Minimize2 } from 'lucide-react';
 
 // Dynamically import Monaco to avoid SSR issues
 const MonacoEditor = dynamic(() => import('@monaco-editor/react'), {
@@ -41,6 +42,7 @@ export function VisualEditor({ content, uri = 'ui://my-component/instance-1', en
   
   const [htmlError, setHtmlError] = useState<string | null>(null);
   const [fontSize, setFontSize] = useState(12);
+  const [isEditorExpanded, setIsEditorExpanded] = useState(false);
 
   useEffect(() => {
     const handleResize = () => {
@@ -162,15 +164,16 @@ export function VisualEditor({ content, uri = 'ui://my-component/instance-1', en
   return (
     <div className="h-full flex flex-col overflow-y-auto">
       {/* Configuration Panel */}
-      <div className="p-4 border-b space-y-4 bg-muted/50 shrink-0">
-        <div>
-          <div className="grid grid-cols-1 gap-4">
-            {/* URI Field */}
-            <div className="space-y-2">
-              <Label htmlFor="uri">Resource URI</Label>
-              <Input
-                id="uri"
-                type="text"
+      {!isEditorExpanded && (
+        <div className="p-4 border-b space-y-4 bg-muted/50 shrink-0">
+          <div>
+            <div className="grid grid-cols-1 gap-4">
+              {/* URI Field */}
+              <div className="space-y-2">
+                <Label htmlFor="uri">Resource URI</Label>
+                <Input
+                  id="uri"
+                  type="text"
                 value={currentUri}
                 onChange={(e) => handleUriChange(e.target.value)}
                 placeholder="ui://my-component/instance-1"
@@ -257,9 +260,10 @@ export function VisualEditor({ content, uri = 'ui://my-component/instance-1', en
           </div>
         </div>
       </div>
+      )}
 
       {/* Content Editor */}
-      <div className="flex-1 min-h-[300px] md:min-h-0 flex flex-col">
+      <div className={`flex-1 flex flex-col ${isEditorExpanded ? 'h-full' : 'min-h-[500px]'}`}>
         <div className="p-4 border-b bg-muted/50 flex items-center justify-between">
           <div>
             <h3 className="font-semibold">
@@ -273,12 +277,22 @@ export function VisualEditor({ content, uri = 'ui://my-component/instance-1', en
               {currentContentType === 'remoteDom' && 'Edit your remote DOM script'}
             </p>
           </div>
-          {htmlError && currentContentType === 'rawHtml' && (
-            <div className="flex items-center gap-2 text-destructive text-xs">
-              <AlertCircle className="h-4 w-4" />
-              <span>{htmlError}</span>
-            </div>
-          )}
+          <div className="flex items-center gap-2">
+            {htmlError && currentContentType === 'rawHtml' && (
+              <div className="flex items-center gap-2 text-destructive text-xs mr-2">
+                <AlertCircle className="h-4 w-4" />
+                <span>{htmlError}</span>
+              </div>
+            )}
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => setIsEditorExpanded(!isEditorExpanded)}
+              title={isEditorExpanded ? "Collapse" : "Expand"}
+            >
+              {isEditorExpanded ? <Minimize2 className="h-4 w-4" /> : <Maximize2 className="h-4 w-4" />}
+            </Button>
+          </div>
         </div>
 
         {currentContentType === 'rawHtml' && (
