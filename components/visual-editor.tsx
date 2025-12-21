@@ -370,6 +370,7 @@ export const VisualEditor = forwardRef<VisualEditorHandle, VisualEditorProps>(({
                 <span>{htmlError}</span>
               </div>
             )}
+            {state.contentType !== 'externalUrl' && 
             <Button
               variant="ghost"
               size="icon"
@@ -377,7 +378,7 @@ export const VisualEditor = forwardRef<VisualEditorHandle, VisualEditorProps>(({
               title={isEditorExpanded ? "Collapse" : "Expand"}
             >
               {isEditorExpanded ? <Minimize2 className="h-4 w-4" /> : <Maximize2 className="h-4 w-4" />}
-            </Button>
+            </Button>}
           </div>
         </div>
 
