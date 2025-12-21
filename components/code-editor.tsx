@@ -2,7 +2,7 @@
 
 import dynamic from 'next/dynamic';
 import { ExportLanguage } from '@/lib/types';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 
 // Dynamically import Monaco to avoid SSR issues
 const MonacoEditor = dynamic(() => import('@monaco-editor/react'), {
@@ -22,6 +22,18 @@ interface CodeEditorProps {
 }
 
 export function CodeEditor({ code, language, onChange, readOnly = false }: CodeEditorProps) {
+  const [fontSize, setFontSize] = useState(12);
+
+  useEffect(() => {
+    const handleResize = () => {
+      setFontSize(window.innerWidth < 768 ? 10 : 12);
+    };
+
+    handleResize();
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
   const getLanguageMode = (lang: ExportLanguage): string => {
     switch (lang) {
       case 'typescript':
@@ -68,7 +80,7 @@ export function CodeEditor({ code, language, onChange, readOnly = false }: CodeE
       options={{
         readOnly,
         minimap: { enabled: false },
-        fontSize: 14,
+        fontSize,
         lineNumbers: 'on',
         scrollBeyondLastLine: false,
         automaticLayout: true,

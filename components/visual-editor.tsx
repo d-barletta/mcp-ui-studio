@@ -40,6 +40,17 @@ export function VisualEditor({ content, uri = 'ui://my-component/instance-1', en
   );
   
   const [htmlError, setHtmlError] = useState<string | null>(null);
+  const [fontSize, setFontSize] = useState(12);
+
+  useEffect(() => {
+    const handleResize = () => {
+      setFontSize(window.innerWidth < 768 ? 10 : 12);
+    };
+
+    handleResize();
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
 
   // Build and emit the content change
   const emitChange = useCallback((
@@ -283,7 +294,7 @@ export function VisualEditor({ content, uri = 'ui://my-component/instance-1', en
               beforeMount={handleEditorWillMount}
               options={{
                 minimap: { enabled: false },
-                fontSize: 14,
+                fontSize,
                 lineNumbers: 'on',
                 scrollBeyondLastLine: false,
                 automaticLayout: true,
@@ -322,7 +333,7 @@ export function VisualEditor({ content, uri = 'ui://my-component/instance-1', en
               theme="vs-dark"
               options={{
                 minimap: { enabled: false },
-                fontSize: 14,
+                fontSize,
                 lineNumbers: 'on',
                 scrollBeyondLastLine: false,
                 automaticLayout: true,
