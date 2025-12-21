@@ -346,7 +346,7 @@ export default function StudioClient() {
                     </div>
                   )}
                   {currentContent.type === 'remoteDom' && (
-                    <div className="h-full min-h-[320px] border border-border rounded-lg text-slate-100 p-4 flex flex-col">
+                    <div className="h-full border border-border rounded-lg text-slate-100 p-4 flex flex-col">
                       <div className="text-xs text-slate-300 mb-4 flex items-center justify-between">
                         <span>Remote DOM Preview</span>
                         <span className="text-[10px] px-2 py-1 bg-green-200 text-green-800 rounded">
