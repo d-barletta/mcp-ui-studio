@@ -1,5 +1,9 @@
 # MCP UI Studio
 
+<p align="center">
+	<img src="app/logo.svg" alt="MCP UI Studio" style="max-width:100px; width:100%; height:auto;" />
+</p>
+
 Visual development environment for MCP-UI interfaces
 
 🚀 [**Live Demo**](https://d-barletta.github.io/mcp-ui-studio)
