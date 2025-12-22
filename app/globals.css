@@ -81,6 +81,15 @@ ui-resource-renderer > div {
   height: 100%;
 }
 
+@keyframes animStar {
+  from {
+    transform: translateY(-1000px);
+  }
+  to {
+    transform: translateY(-4000px);
+  }
+}
+
 #stars {
   position: fixed;
   z-index: 0;
@@ -1917,13 +1926,4 @@ ui-resource-renderer > div {
     6px 950px var(--particles),
     98px 1231px var(--particles),
     408px 365px var(--particles);
-}
-
-@keyframes animStar {
-  from {
-    transform: translateY(-1000px);
-  }
-  to {
-    transform: translateY(-4000px);
-  }
 }
