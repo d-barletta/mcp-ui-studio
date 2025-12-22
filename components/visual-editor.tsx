@@ -1,7 +1,6 @@
 'use client';
 
 import { useState, useEffect, useRef, forwardRef, useImperativeHandle } from 'react';
-import dynamic from 'next/dynamic';
 import { ContentType, AdapterConfig, AdapterType } from '@/lib/types';
 import { Label } from './ui/label';
 import { Input } from './ui/input';
@@ -9,16 +8,7 @@ import { Button } from './ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/select';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from './ui/card';
 import { AlertCircle, Maximize2, Minimize2 } from 'lucide-react';
-
-// Dynamically import Monaco to avoid SSR issues
-const MonacoEditor = dynamic(() => import('@monaco-editor/react'), {
-  ssr: false,
-  loading: () => (
-    <div className="flex h-full w-full items-center justify-center bg-muted">
-      <p className="text-muted-foreground">Loading editor...</p>
-    </div>
-  ),
-});
+import { CodeEditor } from './code-editor';
 
 export interface VisualEditorHandle {
   undo: () => void;
@@ -79,20 +69,8 @@ export const VisualEditor = forwardRef<VisualEditorHandle, VisualEditorProps>(
     const [future, setFuture] = useState<VisualEditorState[]>([]);
 
     const [htmlError, setHtmlError] = useState<string | null>(null);
-    const [fontSize, setFontSize] = useState(12);
     const [isEditorExpanded, setIsEditorExpanded] = useState(false);
     const editorRef = useRef<unknown>(null);
-
-    useEffect(() => {
-      const handleResize = () => {
-        setFontSize(window.innerWidth < 768 ? 10 : 12);
-      };
-
-      handleResize();
-      window.addEventListener('resize', handleResize);
-      return () => window.removeEventListener('resize', handleResize);
-    }, []);
-
     // Update state and history
     const updateState = (newState: Partial<VisualEditorState>, addToHistory = true) => {
       if (addToHistory) {
@@ -216,32 +194,6 @@ export const VisualEditor = forwardRef<VisualEditorHandle, VisualEditorProps>(
 
     // Save editor state to history on blur or specific actions if needed
     // For now, we rely on manual state updates for non-editor fields
-
-    const handleEditorWillMount = (monaco: unknown) => {
-      // Configure HTML validation
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      (monaco as any).languages.html.htmlDefaults.setOptions({
-        format: {
-          tabSize: 2,
-          insertSpaces: true,
-          wrapLineLength: 120,
-          unformatted: 'wbr',
-        },
-        suggest: { html5: true },
-      });
-    };
-
-    const handleEditorDidMount = (editor: unknown) => {
-      editorRef.current = editor;
-
-      // Add history entry when editor content changes (debounced or on blur could be better)
-      // But since we disabled history for onChange, we need a way to capture it.
-      // Let's capture on blur for now
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      (editor as any).onDidBlurEditorText(() => {
-        setHistory((prev) => [...prev, state]);
-      });
-    };
 
     const handleUndo = () => {
       if (history.length === 0) return;
@@ -554,64 +506,17 @@ export const VisualEditor = forwardRef<VisualEditorHandle, VisualEditorProps>(
 
           {state.contentType === 'rawHtml' && (
             <div className="min-h-0 flex-1">
-              <MonacoEditor
-                height="100%"
-                language="html"
-                value={state.htmlString}
+              <CodeEditor
+                code={state.htmlString}
+                language="typescript"
                 onChange={handleHtmlChange}
-                theme="vs-dark"
-                beforeMount={handleEditorWillMount}
-                onMount={handleEditorDidMount}
-                options={{
-                  minimap: { enabled: false },
-                  fontSize,
-                  lineNumbers: 'on',
-                  scrollBeyondLastLine: false,
-                  automaticLayout: true,
-                  tabSize: 2,
-                  wordWrap: 'on',
-                }}
               />
             </div>
           )}
 
-          {/* {state.contentType === 'externalUrl' && (
-            <div className="flex-1 p-2">
-              <Card>
-                <CardHeader>
-                  <CardTitle>External URL Configuration</CardTitle>
-                  <CardDescription>
-                    The external URL will be loaded in an iframe. Configure the URL in the fields
-                    above.
-                  </CardDescription>
-                </CardHeader>
-                      <CardContent>
-                        <p className="text-sm text-muted-foreground">
-                          URL configured above will be loaded in the preview pane.
-                        </p>
-                      </CardContent>
-              </Card>
-            </div>
-          )} */}
-
           {state.contentType === 'remoteDom' && (
             <div className="min-h-0 flex-1">
-              <MonacoEditor
-                height="100%"
-                language="javascript"
-                value={state.script}
-                onChange={handleScriptChange}
-                theme="vs-dark"
-                onMount={handleEditorDidMount}
-                options={{
-                  minimap: { enabled: false },
-                  fontSize,
-                  lineNumbers: 'on',
-                  scrollBeyondLastLine: false,
-                  automaticLayout: true,
-                  tabSize: 2,
-                }}
-              />
+              <CodeEditor code={state.script} language="typescript" onChange={handleScriptChange} />
             </div>
           )}
         </div>

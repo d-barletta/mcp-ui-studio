@@ -3,6 +3,7 @@
 import dynamic from 'next/dynamic';
 import { ExportLanguage } from '@/lib/types';
 import { useEffect, useState } from 'react';
+import { useTheme } from 'next-themes';
 
 // Dynamically import Monaco to avoid SSR issues
 const MonacoEditor = dynamic(() => import('@monaco-editor/react'), {
@@ -23,6 +24,7 @@ interface CodeEditorProps {
 
 export function CodeEditor({ code, language, onChange, readOnly = false }: CodeEditorProps) {
   const [fontSize, setFontSize] = useState(12);
+  const { theme } = useTheme();
 
   useEffect(() => {
     const handleResize = () => {
@@ -77,7 +79,7 @@ export function CodeEditor({ code, language, onChange, readOnly = false }: CodeE
       language={getLanguageMode(language)}
       value={code}
       onChange={onChange}
-      theme="vs-dark"
+      theme={theme === 'light' ? 'vs' : 'vs-dark'}
       beforeMount={handleEditorWillMount}
       options={{
         readOnly,
