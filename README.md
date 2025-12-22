@@ -1,8 +1,6 @@
 # MCP UI Studio
 
-<p align="center">
-	<img src="app/logo.svg" alt="MCP UI Studio" style="max-width:100px; width:100%; height:auto;" />
-</p>
+![MCP UI Studio](app/logo.svg)
 
 Visual development environment for MCP-UI interfaces
 
