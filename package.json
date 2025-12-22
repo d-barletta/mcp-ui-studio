@@ -1,7 +1,23 @@
 {
-  "name": "mcp-studio",
+  "name": "mcp-ui-studio",
   "version": "0.1.0",
-  "private": true,
+  "description": "Visual development environment for building MCP-UI (Model Context Protocol UI) interactive interfaces, ChatGPT Apps and MCP Apps",
+  "author": "Davide Barletta <d-barletta>",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/d-barletta/mcp-ui-studio.git"
+  },
+  "keywords": [
+    "mcp",
+    "mcp-ui",
+    "model-context-protocol",
+    "chatgpt-apps",
+    "mcp-apps",
+    "ui-builder",
+    "visual-development"
+  ],
+  "private": false,
   "scripts": {
     "dev": "BROWSER=none next dev",
     "build": "next build",
