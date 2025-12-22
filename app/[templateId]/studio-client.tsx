@@ -392,19 +392,19 @@ export default function StudioClient() {
                   {currentContent.type === 'remoteDom' && (
                     <div className="flex h-full flex-col rounded-lg border border-border p-4 text-slate-100">
                       <div className="mb-4 flex items-center justify-between text-xs text-slate-300">
-                        <span>Remote DOM Preview</span>
+                        <span>Remote DOM Preview {`(${currentContent.framework})`}</span>
                         <span className="rounded bg-green-200 px-2 py-1 text-[10px] text-green-800">
                           LIVE
                         </span>
                       </div>
-                      <div className="flex-1 overflow-auto rounded border">
+                      <div className="remoteDomPreview flex-1 overflow-auto rounded border bg-white">
                         <ui-resource-renderer
                           class="block h-full w-full"
                           ref={rendererRef}
                           key={`${currentContent.script}-${currentContent.framework}-${refreshKey}`}
                           resource={JSON.stringify({
                             uri: 'ui://remote-component/preview',
-                            mimeType: `application/vnd.mcp-ui.remote-dom`,
+                            mimeType: `application/vnd.mcp-ui.remote-dom+javascript; framework=${currentContent.framework}`,
                             text: currentContent.script,
                           })}
                           remote-dom-props={JSON.stringify({

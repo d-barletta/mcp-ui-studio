@@ -62,7 +62,8 @@
 
 .monaco-editor,
 .monaco-diff-editor,
-.monaco-component {
+.monaco-component,
+.remoteDomPreview {
   z-index: 1;
   position: relative;
 }
