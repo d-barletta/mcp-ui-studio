@@ -20,7 +20,7 @@ declare global {
     }
   }
 }
-import { Template, ContentType } from '@/lib/types';
+import { Template, ContentType, AdapterConfig } from '@/lib/types';
 import { templates } from '@/lib/templates';
 import { ExportPanel } from '@/components/export-panel';
 import { CodeEditor } from '@/components/code-editor';
@@ -115,6 +115,7 @@ export default function StudioClient() {
 
   const [selectedTemplate, setSelectedTemplate] = useState<Template | null>(null);
   const [editedContent, setEditedContent] = useState<ContentType | null>(null);
+  const [adapter, setAdapter] = useState<AdapterConfig>({ type: 'none' });
   const [editorCode, setEditorCode] = useState<string>('');
   const [contentError, setContentError] = useState<string | null>(null);
   const [rightPanelTab, setRightPanelTab] = useState<'editor' | 'visual' | 'console'>('visual');
@@ -268,8 +269,10 @@ export default function StudioClient() {
     content: ContentType;
     uri: string;
     encoding: 'text' | 'blob';
+    adapter: AdapterConfig;
   }) => {
     setEditedContent(config.content);
+    setAdapter(config.adapter);
     setEditorCode(generateEditorCode(config.content));
     setContentError(null);
   };
@@ -505,6 +508,7 @@ export default function StudioClient() {
                         content={currentContent}
                         uri="ui://my-component/instance-1"
                         encoding="text"
+                        adapter={adapter}
                         onChange={handleVisualEditorChange}
                         onHistoryChange={(undo, redo) => {
                           setCanUndo(undo);
@@ -667,7 +671,7 @@ export default function StudioClient() {
           <TabsContent value="export" className="m-0 min-h-0 flex-1 p-0">
             <ScrollArea className="h-full">
               <div className="mx-auto max-w-4xl p-0 md:p-8">
-                <ExportPanel content={currentContent} />
+                <ExportPanel content={currentContent} adapter={adapter} />
               </div>
             </ScrollArea>
           </TabsContent>

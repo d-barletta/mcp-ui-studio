@@ -26,6 +26,30 @@ export type ContentType =
 
 export type Encoding = 'text' | 'blob';
 
+// Adapter Types
+export type AdapterType = 'none' | 'chatgpt' | 'mcp-apps';
+
+export interface ChatGPTAdapterConfig {
+  enabled: boolean;
+  intentHandling?: 'prompt' | 'tool';
+  widgetDescription?: string;
+  widgetPrefersBorder?: boolean;
+  widgetCSP?: {
+    connect_domains?: string[];
+    resource_domains?: string[];
+  };
+}
+
+export interface MCPAppsAdapterConfig {
+  enabled: boolean;
+}
+
+export interface AdapterConfig {
+  type: AdapterType;
+  chatgpt?: ChatGPTAdapterConfig;
+  mcpApps?: MCPAppsAdapterConfig;
+}
+
 // Template Types
 export interface Template {
   id: string;

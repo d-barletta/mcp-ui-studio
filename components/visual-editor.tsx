@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback, useRef, forwardRef, useImperativeHandle } from 'react';
 import dynamic from 'next/dynamic';
-import { ContentType } from '@/lib/types';
+import { ContentType, AdapterConfig, AdapterType } from '@/lib/types';
 import { Label } from './ui/label';
 import { Input } from './ui/input';
 import { Button } from './ui/button';
@@ -29,7 +29,13 @@ interface VisualEditorProps {
   content: ContentType;
   uri?: string;
   encoding?: 'text' | 'blob';
-  onChange: (config: { content: ContentType; uri: string; encoding: 'text' | 'blob' }) => void;
+  adapter?: AdapterConfig;
+  onChange: (config: {
+    content: ContentType;
+    uri: string;
+    encoding: 'text' | 'blob';
+    adapter: AdapterConfig;
+  }) => void;
   onHistoryChange?: (canUndo: boolean, canRedo: boolean) => void;
 }
 
@@ -41,11 +47,19 @@ interface VisualEditorState {
   iframeUrl: string;
   script: string;
   framework: 'react' | 'webcomponents';
+  adapter: AdapterConfig;
 }
 
 export const VisualEditor = forwardRef<VisualEditorHandle, VisualEditorProps>(
   (
-    { content, uri = 'ui://my-component/instance-1', encoding = 'text', onChange, onHistoryChange },
+    {
+      content,
+      uri = 'ui://my-component/instance-1',
+      encoding = 'text',
+      adapter = { type: 'none' },
+      onChange,
+      onHistoryChange,
+    },
     ref
   ) => {
     // Initial state
@@ -57,6 +71,7 @@ export const VisualEditor = forwardRef<VisualEditorHandle, VisualEditorProps>(
       iframeUrl: content.type === 'externalUrl' ? content.iframeUrl : '',
       script: content.type === 'remoteDom' ? content.script : '',
       framework: content.type === 'remoteDom' ? content.framework : 'react',
+      adapter,
     };
 
     const [state, setState] = useState<VisualEditorState>(initialState);
@@ -106,6 +121,7 @@ export const VisualEditor = forwardRef<VisualEditorHandle, VisualEditorProps>(
         content: newContent,
         uri: updatedState.uri,
         encoding: updatedState.encoding,
+        adapter: updatedState.adapter,
       });
     };
 
@@ -136,6 +152,36 @@ export const VisualEditor = forwardRef<VisualEditorHandle, VisualEditorProps>(
 
     const handleFrameworkChange = (value: 'react' | 'webcomponents') => {
       updateState({ framework: value });
+    };
+
+    const handleAdapterTypeChange = (value: AdapterType) => {
+      const newAdapter: AdapterConfig = { type: value };
+      if (value === 'chatgpt') {
+        newAdapter.chatgpt = {
+          enabled: true,
+          intentHandling: 'prompt',
+          widgetPrefersBorder: true,
+        };
+      } else if (value === 'mcp-apps') {
+        newAdapter.mcpApps = { enabled: true };
+      }
+      updateState({ adapter: newAdapter });
+    };
+
+    const handleChatGPTConfigChange = (
+      field: keyof NonNullable<AdapterConfig['chatgpt']>,
+      value: any
+    ) => {
+      updateState({
+        adapter: {
+          ...state.adapter,
+          chatgpt: {
+            ...state.adapter.chatgpt,
+            enabled: true,
+            [field]: value,
+          },
+        },
+      });
     };
 
     const handleScriptChange = (value: string | undefined) => {
@@ -217,6 +263,7 @@ export const VisualEditor = forwardRef<VisualEditorHandle, VisualEditorProps>(
         content: newContent,
         uri: previous.uri,
         encoding: previous.encoding,
+        adapter: previous.adapter,
       });
     };
 
@@ -243,6 +290,7 @@ export const VisualEditor = forwardRef<VisualEditorHandle, VisualEditorProps>(
         content: newContent,
         uri: next.uri,
         encoding: next.encoding,
+        adapter: next.adapter,
       });
     };
 
@@ -314,6 +362,111 @@ export const VisualEditor = forwardRef<VisualEditorHandle, VisualEditorProps>(
                     Text for direct content, Blob for base64-encoded content
                   </p>
                 </div>
+
+                {/* Adapter Selector */}
+                <div className="space-y-2">
+                  <Label htmlFor="adapter">Adapter</Label>
+                  <Select value={state.adapter.type} onValueChange={handleAdapterTypeChange}>
+                    <SelectTrigger id="adapter">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="none">None (Standard MCP-UI)</SelectItem>
+                      <SelectItem value="chatgpt">ChatGPT Apps SDK</SelectItem>
+                      <SelectItem value="mcp-apps">MCP Apps</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  <p className="text-xs text-muted-foreground">
+                    {state.adapter.type === 'none' && 'Standard MCP-UI protocol'}
+                    {state.adapter.type === 'chatgpt' &&
+                      'Enable ChatGPT Apps SDK adapter with bridge script'}
+                    {state.adapter.type === 'mcp-apps' &&
+                      'Enable MCP Apps SEP protocol translation'}
+                  </p>
+                </div>
+
+                {/* ChatGPT Adapter Configuration */}
+                {state.adapter.type === 'chatgpt' && state.adapter.chatgpt && (
+                  <Card>
+                    <CardHeader>
+                      <CardTitle className="text-base">ChatGPT Apps SDK Options</CardTitle>
+                      <CardDescription className="text-xs">
+                        Configure ChatGPT-specific metadata and behavior
+                      </CardDescription>
+                    </CardHeader>
+                    <CardContent className="space-y-4">
+                      <div className="space-y-2">
+                        <Label htmlFor="widgetDescription">Widget Description</Label>
+                        <Input
+                          id="widgetDescription"
+                          type="text"
+                          value={state.adapter.chatgpt.widgetDescription || ''}
+                          onChange={(e) =>
+                            handleChatGPTConfigChange('widgetDescription', e.target.value)
+                          }
+                          placeholder="Interactive calculator"
+                          className="text-sm"
+                        />
+                        <p className="text-xs text-muted-foreground">
+                          Description shown in ChatGPT
+                        </p>
+                      </div>
+
+                      <div className="space-y-2">
+                        <Label htmlFor="intentHandling">Intent Handling</Label>
+                        <Select
+                          value={state.adapter.chatgpt.intentHandling || 'prompt'}
+                          onValueChange={(v) => handleChatGPTConfigChange('intentHandling', v)}
+                        >
+                          <SelectTrigger id="intentHandling">
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="prompt">Prompt</SelectItem>
+                            <SelectItem value="tool">Tool</SelectItem>
+                          </SelectContent>
+                        </Select>
+                        <p className="text-xs text-muted-foreground">
+                          How user intents are handled
+                        </p>
+                      </div>
+
+                      <div className="flex items-center space-x-2">
+                        <input
+                          type="checkbox"
+                          id="widgetPrefersBorder"
+                          checked={state.adapter.chatgpt.widgetPrefersBorder !== false}
+                          onChange={(e) =>
+                            handleChatGPTConfigChange('widgetPrefersBorder', e.target.checked)
+                          }
+                          className="h-4 w-4"
+                        />
+                        <Label htmlFor="widgetPrefersBorder" className="text-sm font-normal">
+                          Widget prefers border
+                        </Label>
+                      </div>
+                    </CardContent>
+                  </Card>
+                )}
+
+                {/* MCP Apps Adapter Info */}
+                {state.adapter.type === 'mcp-apps' && (
+                  <Card>
+                    <CardHeader>
+                      <CardTitle className="text-base">MCP Apps SEP</CardTitle>
+                      <CardDescription className="text-xs">
+                        Protocol translation enabled
+                      </CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                      <p className="text-sm text-muted-foreground">
+                        The adapter automatically translates MCP-UI protocol messages to MCP Apps
+                        SEP JSON-RPC format. Your widget communicates via postMessage and the
+                        adapter handles the protocol translation seamlessly.
+                      </p>
+                    </CardContent>
+                  </Card>
+                )}
 
                 {/* External URL Input (only for externalUrl type) */}
                 {state.contentType === 'externalUrl' && (
