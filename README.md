@@ -1,11 +1,10 @@
-
 <p align="center" >
 	<img src="app/logo.svg" alt="MCP UI Studio" width="150" style="height:auto;" />
 </p>
 
 # MCP UI Studio
 
-Visual development environment for MCP-UI interfaces
+Visual development environment for MCP-UI interfaces, ChatGPT Apps and MCP Apps
 
 🚀 [**Live Demo**](https://d-barletta.github.io/mcp-ui-studio)
 

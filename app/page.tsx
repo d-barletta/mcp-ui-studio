@@ -25,7 +25,7 @@ export default function GalleryPage() {
               <h1 className="text-4xl font-bold">MCP UI Studio</h1>
             </div>
             <p className="text-lg text-muted-foreground">
-              Visual development environment for MCP-UI interfaces
+              Visual development environment for MCP-UI interfaces, ChatGPT Apps and MCP Apps
             </p>
           </div>
           <div className="flex items-center gap-2">
