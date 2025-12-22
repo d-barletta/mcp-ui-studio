@@ -511,29 +511,31 @@ export const VisualEditor = forwardRef<VisualEditorHandle, VisualEditorProps>(
         )}
 
         {/* Content Editor */}
-        <div className={`flex flex-1 flex-col ${isEditorExpanded ? 'h-full' : 'min-h-[500px]'}`}>
-          <div className="flex items-center justify-between border-b bg-muted/50 p-4">
-            <div>
-              <h3 className="font-semibold">
-                {state.contentType === 'rawHtml' && 'HTML Content'}
-                {state.contentType === 'externalUrl' && 'External URL Configuration'}
-                {state.contentType === 'remoteDom' && 'Remote DOM Script'}
-              </h3>
-              <p className="mt-1 text-xs text-muted-foreground">
-                {state.contentType === 'rawHtml' && 'Edit your HTML content with syntax validation'}
-                {state.contentType === 'externalUrl' &&
-                  'Configure the external URL in the fields above'}
-                {state.contentType === 'remoteDom' && 'Edit your remote DOM script'}
-              </p>
-            </div>
-            <div className="flex items-center gap-2">
-              {htmlError && state.contentType === 'rawHtml' && (
-                <div className="mr-2 flex items-center gap-2 text-xs text-destructive">
-                  <AlertCircle className="h-4 w-4" />
-                  <span>{htmlError}</span>
-                </div>
-              )}
-              {state.contentType !== 'externalUrl' && (
+        <div
+          className={`flex flex-1 flex-col ${isEditorExpanded ? 'h-full' : state.contentType !== 'externalUrl' ? 'min-h-[500px]' : ''}`}
+        >
+          {state.contentType !== 'externalUrl' && (
+            <div className="flex items-center justify-between border-b bg-muted/50 p-4">
+              <div>
+                <h3 className="font-semibold">
+                  {state.contentType === 'rawHtml' && 'HTML Content'}
+                  {state.contentType === 'remoteDom' && 'Remote DOM Script'}
+                </h3>
+                <p className="mt-1 text-xs text-muted-foreground">
+                  {state.contentType === 'rawHtml' &&
+                    'Edit your HTML content with syntax validation'}
+
+                  {state.contentType === 'remoteDom' && 'Edit your remote DOM script'}
+                </p>
+              </div>
+              <div className="flex items-center gap-2">
+                {htmlError && state.contentType === 'rawHtml' && (
+                  <div className="mr-2 flex items-center gap-2 text-xs text-destructive">
+                    <AlertCircle className="h-4 w-4" />
+                    <span>{htmlError}</span>
+                  </div>
+                )}
+
                 <Button
                   variant="ghost"
                   size="icon"
@@ -546,9 +548,9 @@ export const VisualEditor = forwardRef<VisualEditorHandle, VisualEditorProps>(
                     <Maximize2 className="h-4 w-4" />
                   )}
                 </Button>
-              )}
+              </div>
             </div>
-          </div>
+          )}
 
           {state.contentType === 'rawHtml' && (
             <div className="min-h-0 flex-1">
@@ -573,7 +575,7 @@ export const VisualEditor = forwardRef<VisualEditorHandle, VisualEditorProps>(
             </div>
           )}
 
-          {state.contentType === 'externalUrl' && (
+          {/* {state.contentType === 'externalUrl' && (
             <div className="flex-1 p-2">
               <Card>
                 <CardHeader>
@@ -583,16 +585,14 @@ export const VisualEditor = forwardRef<VisualEditorHandle, VisualEditorProps>(
                     above.
                   </CardDescription>
                 </CardHeader>
-                <CardContent>
-                  <div className="rounded-md bg-muted p-4">
-                    <p className="break-all font-mono text-sm">
-                      {state.iframeUrl || 'No URL specified'}
-                    </p>
-                  </div>
-                </CardContent>
+                      <CardContent>
+                        <p className="text-sm text-muted-foreground">
+                          URL configured above will be loaded in the preview pane.
+                        </p>
+                      </CardContent>
               </Card>
             </div>
-          )}
+          )} */}
 
           {state.contentType === 'remoteDom' && (
             <div className="min-h-0 flex-1">
