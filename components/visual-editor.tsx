@@ -530,7 +530,7 @@ export const VisualEditor = forwardRef<VisualEditorHandle, VisualEditorProps>(
               </div>
               <div className="flex items-center gap-2">
                 {htmlError && state.contentType === 'rawHtml' && (
-                  <div className="mr-2 flex items-center gap-2 text-xs text-destructive">
+                  <div className="flex items-center gap-2 rounded bg-red-500/10 px-2 py-1 text-xs font-semibold text-red-500">
                     <AlertCircle className="h-4 w-4" />
                     <span>{htmlError}</span>
                   </div>

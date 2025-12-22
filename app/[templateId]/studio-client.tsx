@@ -532,6 +532,20 @@ export default function StudioClient() {
                         </p>
                       </div>
                       <div className="flex items-center gap-2">
+                        {contentError && (
+                          <div className="flex items-center gap-2 rounded bg-red-500/10 px-2 py-1 text-xs font-semibold text-red-500">
+                            <AlertCircle className="h-4 w-4" />
+                            <span>{contentError}</span>
+                          </div>
+                        )}
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={handleRefresh}
+                          title="Refresh Preview"
+                        >
+                          <RotateCw className="h-3 w-3" />
+                        </Button>
                         <Button
                           variant="ghost"
                           size="sm"
@@ -545,20 +559,6 @@ export default function StudioClient() {
                             <Maximize2 className="h-4 w-4" />
                           )}
                         </Button>
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={handleRefresh}
-                          title="Refresh Preview"
-                        >
-                          <RotateCw className="h-3 w-3" />
-                        </Button>
-                        {contentError && (
-                          <div className="flex items-center gap-2 text-xs text-destructive">
-                            <AlertCircle className="h-4 w-4" />
-                            <span>{contentError}</span>
-                          </div>
-                        )}
                       </div>
                     </div>
                     <div className="min-h-0 flex-1 overflow-hidden">
@@ -585,6 +585,14 @@ export default function StudioClient() {
                         <Button
                           variant="ghost"
                           size="sm"
+                          onClick={() => setConsoleMessages([])}
+                          title="Clear"
+                        >
+                          <TrashIcon className="h-3 w-3" />
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="sm"
                           className="lg:hidden"
                           onClick={() => setIsMaximized(!isMaximized)}
                           title={isMaximized ? 'Minimize' : 'Maximize'}
@@ -594,14 +602,6 @@ export default function StudioClient() {
                           ) : (
                             <Maximize2 className="h-4 w-4" />
                           )}
-                        </Button>
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => setConsoleMessages([])}
-                          title="Clear"
-                        >
-                          <TrashIcon className="h-3 w-3" />
                         </Button>
                       </div>
                     </div>
@@ -655,7 +655,7 @@ export default function StudioClient() {
                   </p>
                 </div>
                 {contentError && (
-                  <div className="flex items-center gap-2 text-xs text-destructive">
+                  <div className="flex items-center gap-2 rounded bg-red-500/10 px-2 py-1 text-xs font-semibold text-red-500">
                     <AlertCircle className="h-4 w-4" />
                     <span>{contentError}</span>
                   </div>
