@@ -5,6 +5,7 @@ import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
 
 // Add custom element type for ui-resource-renderer
+/* eslint-disable @typescript-eslint/no-namespace */
 declare global {
   namespace JSX {
     interface IntrinsicElements {
@@ -20,7 +21,8 @@ declare global {
     }
   }
 }
-import { Template, ContentType } from '@/lib/types';
+/* eslint-enable @typescript-eslint/no-namespace */
+import { Template, ContentType, AdapterConfig } from '@/lib/types';
 import { templates } from '@/lib/templates';
 import { ExportPanel } from '@/components/export-panel';
 import { CodeEditor } from '@/components/code-editor';
@@ -46,14 +48,14 @@ import {
 } from 'lucide-react';
 import { ThemeSwitcher } from '@/components/theme-switcher';
 import { Logo } from '@/components/logo';
-import { UIResourceRenderer, remoteButtonDefinition, remoteTextDefinition } from '@mcp-ui/client';
+import { remoteButtonDefinition, remoteTextDefinition } from '@mcp-ui/client';
 import { VisualEditorHandle } from '@/components/visual-editor';
 
 interface ConsoleMessage {
   id: number;
   timestamp: Date;
   type: 'action' | 'error' | 'info';
-  data: any;
+  data: unknown;
 }
 
 const generateEditorCode = (content: ContentType): string => {
@@ -115,6 +117,7 @@ export default function StudioClient() {
 
   const [selectedTemplate, setSelectedTemplate] = useState<Template | null>(null);
   const [editedContent, setEditedContent] = useState<ContentType | null>(null);
+  const [adapter, setAdapter] = useState<AdapterConfig>({ type: 'none' });
   const [editorCode, setEditorCode] = useState<string>('');
   const [contentError, setContentError] = useState<string | null>(null);
   const [rightPanelTab, setRightPanelTab] = useState<'editor' | 'visual' | 'console'>('visual');
@@ -131,7 +134,7 @@ export default function StudioClient() {
 
   useEffect(() => {
     // Dynamically load the web component to avoid SSR issues
-    // @ts-ignore
+    // @ts-expect-error - Web component module doesn't have TypeScript definitions
     import('@mcp-ui/client/ui-resource-renderer.wc.js');
   }, []);
 
@@ -159,7 +162,7 @@ export default function StudioClient() {
     router.push('/');
   };
 
-  const addConsoleMessage = (type: ConsoleMessage['type'], data: any) => {
+  const addConsoleMessage = (type: ConsoleMessage['type'], data: unknown) => {
     messageIdCounter.current += 1;
     const message: ConsoleMessage = {
       id: messageIdCounter.current,
@@ -183,8 +186,9 @@ export default function StudioClient() {
     const element = rendererRef.current;
     if (!element) return;
 
-    const handleAction = (event: any) => {
-      const action = event.detail;
+    const handleAction = (event: Event) => {
+      const customEvent = event as CustomEvent;
+      const action = customEvent.detail;
       // Filter out internal messages (arrays)
       if (Array.isArray(action)) return;
 
@@ -259,7 +263,7 @@ export default function StudioClient() {
       setContentError(null);
       setConsoleMessages([]); // Clear console on content update
       setUnreadCount(0);
-    } catch (error) {
+    } catch {
       setContentError('Invalid UI format');
     }
   };
@@ -268,8 +272,10 @@ export default function StudioClient() {
     content: ContentType;
     uri: string;
     encoding: 'text' | 'blob';
+    adapter: AdapterConfig;
   }) => {
     setEditedContent(config.content);
+    setAdapter(config.adapter);
     setEditorCode(generateEditorCode(config.content));
     setContentError(null);
   };
@@ -505,6 +511,7 @@ export default function StudioClient() {
                         content={currentContent}
                         uri="ui://my-component/instance-1"
                         encoding="text"
+                        adapter={adapter}
                         onChange={handleVisualEditorChange}
                         onHistoryChange={(undo, redo) => {
                           setCanUndo(undo);
@@ -525,6 +532,20 @@ export default function StudioClient() {
                         </p>
                       </div>
                       <div className="flex items-center gap-2">
+                        {contentError && (
+                          <div className="flex items-center gap-2 rounded bg-red-500/10 px-2 py-1 text-xs font-semibold text-red-500">
+                            <AlertCircle className="h-4 w-4" />
+                            <span>{contentError}</span>
+                          </div>
+                        )}
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={handleRefresh}
+                          title="Refresh Preview"
+                        >
+                          <RotateCw className="h-3 w-3" />
+                        </Button>
                         <Button
                           variant="ghost"
                           size="sm"
@@ -538,20 +559,6 @@ export default function StudioClient() {
                             <Maximize2 className="h-4 w-4" />
                           )}
                         </Button>
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={handleRefresh}
-                          title="Refresh Preview"
-                        >
-                          <RotateCw className="h-3 w-3" />
-                        </Button>
-                        {contentError && (
-                          <div className="flex items-center gap-2 text-xs text-destructive">
-                            <AlertCircle className="h-4 w-4" />
-                            <span>{contentError}</span>
-                          </div>
-                        )}
                       </div>
                     </div>
                     <div className="min-h-0 flex-1 overflow-hidden">
@@ -578,6 +585,14 @@ export default function StudioClient() {
                         <Button
                           variant="ghost"
                           size="sm"
+                          onClick={() => setConsoleMessages([])}
+                          title="Clear"
+                        >
+                          <TrashIcon className="h-3 w-3" />
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="sm"
                           className="lg:hidden"
                           onClick={() => setIsMaximized(!isMaximized)}
                           title={isMaximized ? 'Minimize' : 'Maximize'}
@@ -587,14 +602,6 @@ export default function StudioClient() {
                           ) : (
                             <Maximize2 className="h-4 w-4" />
                           )}
-                        </Button>
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => setConsoleMessages([])}
-                          title="Clear"
-                        >
-                          <TrashIcon className="h-3 w-3" />
                         </Button>
                       </div>
                     </div>
@@ -648,7 +655,7 @@ export default function StudioClient() {
                   </p>
                 </div>
                 {contentError && (
-                  <div className="flex items-center gap-2 text-xs text-destructive">
+                  <div className="flex items-center gap-2 rounded bg-red-500/10 px-2 py-1 text-xs font-semibold text-red-500">
                     <AlertCircle className="h-4 w-4" />
                     <span>{contentError}</span>
                   </div>
@@ -667,7 +674,7 @@ export default function StudioClient() {
           <TabsContent value="export" className="m-0 min-h-0 flex-1 p-0">
             <ScrollArea className="h-full">
               <div className="mx-auto max-w-4xl p-0 md:p-8">
-                <ExportPanel content={currentContent} />
+                <ExportPanel content={currentContent} adapter={adapter} />
               </div>
             </ScrollArea>
           </TabsContent>

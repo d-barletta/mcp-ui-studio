@@ -1,8 +1,8 @@
 'use client';
 
-import { useState, useEffect, useCallback, useRef, forwardRef, useImperativeHandle } from 'react';
+import { useState, useEffect, useRef, forwardRef, useImperativeHandle } from 'react';
 import dynamic from 'next/dynamic';
-import { ContentType } from '@/lib/types';
+import { ContentType, AdapterConfig, AdapterType } from '@/lib/types';
 import { Label } from './ui/label';
 import { Input } from './ui/input';
 import { Button } from './ui/button';
@@ -29,7 +29,13 @@ interface VisualEditorProps {
   content: ContentType;
   uri?: string;
   encoding?: 'text' | 'blob';
-  onChange: (config: { content: ContentType; uri: string; encoding: 'text' | 'blob' }) => void;
+  adapter?: AdapterConfig;
+  onChange: (config: {
+    content: ContentType;
+    uri: string;
+    encoding: 'text' | 'blob';
+    adapter: AdapterConfig;
+  }) => void;
   onHistoryChange?: (canUndo: boolean, canRedo: boolean) => void;
 }
 
@@ -41,11 +47,19 @@ interface VisualEditorState {
   iframeUrl: string;
   script: string;
   framework: 'react' | 'webcomponents';
+  adapter: AdapterConfig;
 }
 
 export const VisualEditor = forwardRef<VisualEditorHandle, VisualEditorProps>(
   (
-    { content, uri = 'ui://my-component/instance-1', encoding = 'text', onChange, onHistoryChange },
+    {
+      content,
+      uri = 'ui://my-component/instance-1',
+      encoding = 'text',
+      adapter = { type: 'none' },
+      onChange,
+      onHistoryChange,
+    },
     ref
   ) => {
     // Initial state
@@ -57,6 +71,7 @@ export const VisualEditor = forwardRef<VisualEditorHandle, VisualEditorProps>(
       iframeUrl: content.type === 'externalUrl' ? content.iframeUrl : '',
       script: content.type === 'remoteDom' ? content.script : '',
       framework: content.type === 'remoteDom' ? content.framework : 'react',
+      adapter,
     };
 
     const [state, setState] = useState<VisualEditorState>(initialState);
@@ -66,7 +81,7 @@ export const VisualEditor = forwardRef<VisualEditorHandle, VisualEditorProps>(
     const [htmlError, setHtmlError] = useState<string | null>(null);
     const [fontSize, setFontSize] = useState(12);
     const [isEditorExpanded, setIsEditorExpanded] = useState(false);
-    const editorRef = useRef<any>(null);
+    const editorRef = useRef<unknown>(null);
 
     useEffect(() => {
       const handleResize = () => {
@@ -106,6 +121,7 @@ export const VisualEditor = forwardRef<VisualEditorHandle, VisualEditorProps>(
         content: newContent,
         uri: updatedState.uri,
         encoding: updatedState.encoding,
+        adapter: updatedState.adapter,
       });
     };
 
@@ -116,10 +132,11 @@ export const VisualEditor = forwardRef<VisualEditorHandle, VisualEditorProps>(
       if (content.type !== state.contentType) {
         // External update logic if needed, but usually we drive state from here
       }
+      // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [content]);
 
     const handleContentTypeChange = (value: string) => {
-      updateState({ contentType: value as any });
+      updateState({ contentType: value as 'rawHtml' | 'externalUrl' | 'remoteDom' });
     };
 
     const handleUriChange = (value: string) => {
@@ -136,6 +153,36 @@ export const VisualEditor = forwardRef<VisualEditorHandle, VisualEditorProps>(
 
     const handleFrameworkChange = (value: 'react' | 'webcomponents') => {
       updateState({ framework: value });
+    };
+
+    const handleAdapterTypeChange = (value: AdapterType) => {
+      const newAdapter: AdapterConfig = { type: value };
+      if (value === 'chatgpt') {
+        newAdapter.chatgpt = {
+          enabled: true,
+          intentHandling: 'prompt',
+          widgetPrefersBorder: true,
+        };
+      } else if (value === 'mcp-apps') {
+        newAdapter.mcpApps = { enabled: true };
+      }
+      updateState({ adapter: newAdapter });
+    };
+
+    const handleChatGPTConfigChange = (
+      field: keyof NonNullable<AdapterConfig['chatgpt']>,
+      value: string | boolean | { connect_domains?: string[]; resource_domains?: string[] }
+    ) => {
+      updateState({
+        adapter: {
+          ...state.adapter,
+          chatgpt: {
+            ...state.adapter.chatgpt,
+            enabled: true,
+            [field]: value,
+          },
+        },
+      });
     };
 
     const handleScriptChange = (value: string | undefined) => {
@@ -160,7 +207,7 @@ export const VisualEditor = forwardRef<VisualEditorHandle, VisualEditorProps>(
         } else {
           setHtmlError(null);
         }
-      } catch (error) {
+      } catch {
         setHtmlError('HTML parsing error');
       }
 
@@ -170,9 +217,10 @@ export const VisualEditor = forwardRef<VisualEditorHandle, VisualEditorProps>(
     // Save editor state to history on blur or specific actions if needed
     // For now, we rely on manual state updates for non-editor fields
 
-    const handleEditorWillMount = (monaco: any) => {
+    const handleEditorWillMount = (monaco: unknown) => {
       // Configure HTML validation
-      monaco.languages.html.htmlDefaults.setOptions({
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      (monaco as any).languages.html.htmlDefaults.setOptions({
         format: {
           tabSize: 2,
           insertSpaces: true,
@@ -183,13 +231,14 @@ export const VisualEditor = forwardRef<VisualEditorHandle, VisualEditorProps>(
       });
     };
 
-    const handleEditorDidMount = (editor: any) => {
+    const handleEditorDidMount = (editor: unknown) => {
       editorRef.current = editor;
 
       // Add history entry when editor content changes (debounced or on blur could be better)
       // But since we disabled history for onChange, we need a way to capture it.
       // Let's capture on blur for now
-      editor.onDidBlurEditorText(() => {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      (editor as any).onDidBlurEditorText(() => {
         setHistory((prev) => [...prev, state]);
       });
     };
@@ -217,6 +266,7 @@ export const VisualEditor = forwardRef<VisualEditorHandle, VisualEditorProps>(
         content: newContent,
         uri: previous.uri,
         encoding: previous.encoding,
+        adapter: previous.adapter,
       });
     };
 
@@ -243,6 +293,7 @@ export const VisualEditor = forwardRef<VisualEditorHandle, VisualEditorProps>(
         content: newContent,
         uri: next.uri,
         encoding: next.encoding,
+        adapter: next.adapter,
       });
     };
 
@@ -315,6 +366,111 @@ export const VisualEditor = forwardRef<VisualEditorHandle, VisualEditorProps>(
                   </p>
                 </div>
 
+                {/* Adapter Selector */}
+                <div className="space-y-2">
+                  <Label htmlFor="adapter">Adapter</Label>
+                  <Select value={state.adapter.type} onValueChange={handleAdapterTypeChange}>
+                    <SelectTrigger id="adapter">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="none">None (Standard MCP-UI)</SelectItem>
+                      <SelectItem value="chatgpt">ChatGPT Apps SDK</SelectItem>
+                      <SelectItem value="mcp-apps">MCP Apps</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  <p className="text-xs text-muted-foreground">
+                    {state.adapter.type === 'none' && 'Standard MCP-UI protocol'}
+                    {state.adapter.type === 'chatgpt' &&
+                      'Enable ChatGPT Apps SDK adapter with bridge script'}
+                    {state.adapter.type === 'mcp-apps' &&
+                      'Enable MCP Apps SEP protocol translation'}
+                  </p>
+                </div>
+
+                {/* ChatGPT Adapter Configuration */}
+                {state.adapter.type === 'chatgpt' && state.adapter.chatgpt && (
+                  <Card>
+                    <CardHeader>
+                      <CardTitle className="text-base">ChatGPT Apps SDK Options</CardTitle>
+                      <CardDescription className="text-xs">
+                        Configure ChatGPT-specific metadata and behavior
+                      </CardDescription>
+                    </CardHeader>
+                    <CardContent className="space-y-4">
+                      <div className="space-y-2">
+                        <Label htmlFor="widgetDescription">Widget Description</Label>
+                        <Input
+                          id="widgetDescription"
+                          type="text"
+                          value={state.adapter.chatgpt.widgetDescription || ''}
+                          onChange={(e) =>
+                            handleChatGPTConfigChange('widgetDescription', e.target.value)
+                          }
+                          placeholder="Interactive calculator"
+                          className="text-sm"
+                        />
+                        <p className="text-xs text-muted-foreground">
+                          Description shown in ChatGPT
+                        </p>
+                      </div>
+
+                      <div className="space-y-2">
+                        <Label htmlFor="intentHandling">Intent Handling</Label>
+                        <Select
+                          value={state.adapter.chatgpt.intentHandling || 'prompt'}
+                          onValueChange={(v) => handleChatGPTConfigChange('intentHandling', v)}
+                        >
+                          <SelectTrigger id="intentHandling">
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="prompt">Prompt</SelectItem>
+                            <SelectItem value="tool">Tool</SelectItem>
+                          </SelectContent>
+                        </Select>
+                        <p className="text-xs text-muted-foreground">
+                          How user intents are handled
+                        </p>
+                      </div>
+
+                      <div className="flex items-center space-x-2">
+                        <input
+                          type="checkbox"
+                          id="widgetPrefersBorder"
+                          checked={state.adapter.chatgpt.widgetPrefersBorder !== false}
+                          onChange={(e) =>
+                            handleChatGPTConfigChange('widgetPrefersBorder', e.target.checked)
+                          }
+                          className="h-4 w-4"
+                        />
+                        <Label htmlFor="widgetPrefersBorder" className="text-sm font-normal">
+                          Widget prefers border
+                        </Label>
+                      </div>
+                    </CardContent>
+                  </Card>
+                )}
+
+                {/* MCP Apps Adapter Info */}
+                {state.adapter.type === 'mcp-apps' && (
+                  <Card>
+                    <CardHeader>
+                      <CardTitle className="text-base">MCP Apps SEP</CardTitle>
+                      <CardDescription className="text-xs">
+                        Protocol translation enabled
+                      </CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                      <p className="text-sm text-muted-foreground">
+                        The adapter automatically translates MCP-UI protocol messages to MCP Apps
+                        SEP JSON-RPC format. Your widget communicates via postMessage and the
+                        adapter handles the protocol translation seamlessly.
+                      </p>
+                    </CardContent>
+                  </Card>
+                )}
+
                 {/* External URL Input (only for externalUrl type) */}
                 {state.contentType === 'externalUrl' && (
                   <div className="space-y-2">
@@ -355,29 +511,31 @@ export const VisualEditor = forwardRef<VisualEditorHandle, VisualEditorProps>(
         )}
 
         {/* Content Editor */}
-        <div className={`flex flex-1 flex-col ${isEditorExpanded ? 'h-full' : 'min-h-[500px]'}`}>
-          <div className="flex items-center justify-between border-b bg-muted/50 p-4">
-            <div>
-              <h3 className="font-semibold">
-                {state.contentType === 'rawHtml' && 'HTML Content'}
-                {state.contentType === 'externalUrl' && 'External URL Configuration'}
-                {state.contentType === 'remoteDom' && 'Remote DOM Script'}
-              </h3>
-              <p className="mt-1 text-xs text-muted-foreground">
-                {state.contentType === 'rawHtml' && 'Edit your HTML content with syntax validation'}
-                {state.contentType === 'externalUrl' &&
-                  'Configure the external URL in the fields above'}
-                {state.contentType === 'remoteDom' && 'Edit your remote DOM script'}
-              </p>
-            </div>
-            <div className="flex items-center gap-2">
-              {htmlError && state.contentType === 'rawHtml' && (
-                <div className="mr-2 flex items-center gap-2 text-xs text-destructive">
-                  <AlertCircle className="h-4 w-4" />
-                  <span>{htmlError}</span>
-                </div>
-              )}
-              {state.contentType !== 'externalUrl' && (
+        <div
+          className={`flex flex-1 flex-col ${isEditorExpanded ? 'h-full' : state.contentType !== 'externalUrl' ? 'min-h-[500px]' : ''}`}
+        >
+          {state.contentType !== 'externalUrl' && (
+            <div className="flex items-center justify-between border-b bg-muted/50 p-4">
+              <div>
+                <h3 className="font-semibold">
+                  {state.contentType === 'rawHtml' && 'HTML Content'}
+                  {state.contentType === 'remoteDom' && 'Remote DOM Script'}
+                </h3>
+                <p className="mt-1 text-xs text-muted-foreground">
+                  {state.contentType === 'rawHtml' &&
+                    'Edit your HTML content with syntax validation'}
+
+                  {state.contentType === 'remoteDom' && 'Edit your remote DOM script'}
+                </p>
+              </div>
+              <div className="flex items-center gap-2">
+                {htmlError && state.contentType === 'rawHtml' && (
+                  <div className="flex items-center gap-2 rounded bg-red-500/10 px-2 py-1 text-xs font-semibold text-red-500">
+                    <AlertCircle className="h-4 w-4" />
+                    <span>{htmlError}</span>
+                  </div>
+                )}
+
                 <Button
                   variant="ghost"
                   size="icon"
@@ -390,9 +548,9 @@ export const VisualEditor = forwardRef<VisualEditorHandle, VisualEditorProps>(
                     <Maximize2 className="h-4 w-4" />
                   )}
                 </Button>
-              )}
+              </div>
             </div>
-          </div>
+          )}
 
           {state.contentType === 'rawHtml' && (
             <div className="min-h-0 flex-1">
@@ -417,7 +575,7 @@ export const VisualEditor = forwardRef<VisualEditorHandle, VisualEditorProps>(
             </div>
           )}
 
-          {state.contentType === 'externalUrl' && (
+          {/* {state.contentType === 'externalUrl' && (
             <div className="flex-1 p-2">
               <Card>
                 <CardHeader>
@@ -427,16 +585,14 @@ export const VisualEditor = forwardRef<VisualEditorHandle, VisualEditorProps>(
                     above.
                   </CardDescription>
                 </CardHeader>
-                <CardContent>
-                  <div className="rounded-md bg-muted p-4">
-                    <p className="break-all font-mono text-sm">
-                      {state.iframeUrl || 'No URL specified'}
-                    </p>
-                  </div>
-                </CardContent>
+                      <CardContent>
+                        <p className="text-sm text-muted-foreground">
+                          URL configured above will be loaded in the preview pane.
+                        </p>
+                      </CardContent>
               </Card>
             </div>
-          )}
+          )} */}
 
           {state.contentType === 'remoteDom' && (
             <div className="min-h-0 flex-1">
@@ -463,3 +619,5 @@ export const VisualEditor = forwardRef<VisualEditorHandle, VisualEditorProps>(
     );
   }
 );
+
+VisualEditor.displayName = 'VisualEditor';
