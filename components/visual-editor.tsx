@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useCallback, useRef, forwardRef, useImperativeHandle } from 'react';
+import { useState, useEffect, useRef, forwardRef, useImperativeHandle } from 'react';
 import dynamic from 'next/dynamic';
 import { ContentType, AdapterConfig, AdapterType } from '@/lib/types';
 import { Label } from './ui/label';
@@ -81,7 +81,7 @@ export const VisualEditor = forwardRef<VisualEditorHandle, VisualEditorProps>(
     const [htmlError, setHtmlError] = useState<string | null>(null);
     const [fontSize, setFontSize] = useState(12);
     const [isEditorExpanded, setIsEditorExpanded] = useState(false);
-    const editorRef = useRef<any>(null);
+    const editorRef = useRef<unknown>(null);
 
     useEffect(() => {
       const handleResize = () => {
@@ -132,10 +132,11 @@ export const VisualEditor = forwardRef<VisualEditorHandle, VisualEditorProps>(
       if (content.type !== state.contentType) {
         // External update logic if needed, but usually we drive state from here
       }
+      // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [content]);
 
     const handleContentTypeChange = (value: string) => {
-      updateState({ contentType: value as any });
+      updateState({ contentType: value as 'rawHtml' | 'externalUrl' | 'remoteDom' });
     };
 
     const handleUriChange = (value: string) => {
@@ -170,7 +171,7 @@ export const VisualEditor = forwardRef<VisualEditorHandle, VisualEditorProps>(
 
     const handleChatGPTConfigChange = (
       field: keyof NonNullable<AdapterConfig['chatgpt']>,
-      value: any
+      value: string | boolean | { connect_domains?: string[]; resource_domains?: string[] }
     ) => {
       updateState({
         adapter: {
@@ -206,7 +207,7 @@ export const VisualEditor = forwardRef<VisualEditorHandle, VisualEditorProps>(
         } else {
           setHtmlError(null);
         }
-      } catch (error) {
+      } catch {
         setHtmlError('HTML parsing error');
       }
 
@@ -216,9 +217,10 @@ export const VisualEditor = forwardRef<VisualEditorHandle, VisualEditorProps>(
     // Save editor state to history on blur or specific actions if needed
     // For now, we rely on manual state updates for non-editor fields
 
-    const handleEditorWillMount = (monaco: any) => {
+    const handleEditorWillMount = (monaco: unknown) => {
       // Configure HTML validation
-      monaco.languages.html.htmlDefaults.setOptions({
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      (monaco as any).languages.html.htmlDefaults.setOptions({
         format: {
           tabSize: 2,
           insertSpaces: true,
@@ -229,13 +231,14 @@ export const VisualEditor = forwardRef<VisualEditorHandle, VisualEditorProps>(
       });
     };
 
-    const handleEditorDidMount = (editor: any) => {
+    const handleEditorDidMount = (editor: unknown) => {
       editorRef.current = editor;
 
       // Add history entry when editor content changes (debounced or on blur could be better)
       // But since we disabled history for onChange, we need a way to capture it.
       // Let's capture on blur for now
-      editor.onDidBlurEditorText(() => {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      (editor as any).onDidBlurEditorText(() => {
         setHistory((prev) => [...prev, state]);
       });
     };
@@ -616,3 +619,5 @@ export const VisualEditor = forwardRef<VisualEditorHandle, VisualEditorProps>(
     );
   }
 );
+
+VisualEditor.displayName = 'VisualEditor';

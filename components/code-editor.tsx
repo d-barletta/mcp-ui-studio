@@ -47,22 +47,24 @@ export function CodeEditor({ code, language, onChange, readOnly = false }: CodeE
     }
   };
 
-  const handleEditorWillMount = (monaco: any) => {
+  const handleEditorWillMount = (monaco: unknown) => {
     // Completely disable all TypeScript/JavaScript diagnostics
-    monaco.languages.typescript.typescriptDefaults.setDiagnosticsOptions({
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const monacoAny = monaco as any;
+    monacoAny.languages.typescript.typescriptDefaults.setDiagnosticsOptions({
       noSemanticValidation: true,
       noSyntaxValidation: true,
       noSuggestionDiagnostics: true,
     });
 
-    monaco.languages.typescript.javascriptDefaults.setDiagnosticsOptions({
+    monacoAny.languages.typescript.javascriptDefaults.setDiagnosticsOptions({
       noSemanticValidation: true,
       noSyntaxValidation: true,
       noSuggestionDiagnostics: true,
     });
 
     // Disable all compiler options that might trigger diagnostics
-    monaco.languages.typescript.typescriptDefaults.setCompilerOptions({
+    monacoAny.languages.typescript.typescriptDefaults.setCompilerOptions({
       allowNonTsExtensions: true,
       noUnusedLocals: false,
       noUnusedParameters: false,

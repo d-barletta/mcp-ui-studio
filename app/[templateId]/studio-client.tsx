@@ -5,6 +5,7 @@ import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
 
 // Add custom element type for ui-resource-renderer
+/* eslint-disable @typescript-eslint/no-namespace */
 declare global {
   namespace JSX {
     interface IntrinsicElements {
@@ -20,6 +21,7 @@ declare global {
     }
   }
 }
+/* eslint-enable @typescript-eslint/no-namespace */
 import { Template, ContentType, AdapterConfig } from '@/lib/types';
 import { templates } from '@/lib/templates';
 import { ExportPanel } from '@/components/export-panel';
@@ -46,14 +48,14 @@ import {
 } from 'lucide-react';
 import { ThemeSwitcher } from '@/components/theme-switcher';
 import { Logo } from '@/components/logo';
-import { UIResourceRenderer, remoteButtonDefinition, remoteTextDefinition } from '@mcp-ui/client';
+import { remoteButtonDefinition, remoteTextDefinition } from '@mcp-ui/client';
 import { VisualEditorHandle } from '@/components/visual-editor';
 
 interface ConsoleMessage {
   id: number;
   timestamp: Date;
   type: 'action' | 'error' | 'info';
-  data: any;
+  data: unknown;
 }
 
 const generateEditorCode = (content: ContentType): string => {
@@ -132,7 +134,7 @@ export default function StudioClient() {
 
   useEffect(() => {
     // Dynamically load the web component to avoid SSR issues
-    // @ts-ignore
+    // @ts-expect-error - Web component module doesn't have TypeScript definitions
     import('@mcp-ui/client/ui-resource-renderer.wc.js');
   }, []);
 
@@ -160,7 +162,7 @@ export default function StudioClient() {
     router.push('/');
   };
 
-  const addConsoleMessage = (type: ConsoleMessage['type'], data: any) => {
+  const addConsoleMessage = (type: ConsoleMessage['type'], data: unknown) => {
     messageIdCounter.current += 1;
     const message: ConsoleMessage = {
       id: messageIdCounter.current,
@@ -184,8 +186,9 @@ export default function StudioClient() {
     const element = rendererRef.current;
     if (!element) return;
 
-    const handleAction = (event: any) => {
-      const action = event.detail;
+    const handleAction = (event: Event) => {
+      const customEvent = event as CustomEvent;
+      const action = customEvent.detail;
       // Filter out internal messages (arrays)
       if (Array.isArray(action)) return;
 
@@ -260,7 +263,7 @@ export default function StudioClient() {
       setContentError(null);
       setConsoleMessages([]); // Clear console on content update
       setUnreadCount(0);
-    } catch (error) {
+    } catch {
       setContentError('Invalid UI format');
     }
   };
