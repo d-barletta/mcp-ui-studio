@@ -2,6 +2,9 @@
 
 import { useEffect, useRef, useState, ReactNode } from 'react';
 
+// Tailwind lg breakpoint
+const LG_BREAKPOINT = 1024;
+
 interface ResizableSplitViewProps {
   leftPanel: ReactNode;
   rightPanel: ReactNode;
@@ -23,11 +26,12 @@ export function ResizableSplitView({
   const [isDragging, setIsDragging] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
+  const saveTimeoutRef = useRef<NodeJS.Timeout>();
 
   // Check if we're on mobile
   useEffect(() => {
     const checkMobile = () => {
-      setIsMobile(window.innerWidth < 1024);
+      setIsMobile(window.innerWidth < LG_BREAKPOINT);
     };
     
     checkMobile();
@@ -38,21 +42,44 @@ export function ResizableSplitView({
   // Load saved width from localStorage on mount
   useEffect(() => {
     if (storageKey) {
-      const saved = localStorage.getItem(storageKey);
-      if (saved) {
-        const parsed = parseFloat(saved);
-        if (!isNaN(parsed) && parsed >= minWidth && parsed <= 100 - minWidth) {
-          setLeftWidth(parsed);
+      try {
+        const saved = localStorage.getItem(storageKey);
+        if (saved) {
+          const parsed = parseFloat(saved);
+          if (!isNaN(parsed) && parsed >= minWidth && parsed <= 100 - minWidth) {
+            setLeftWidth(parsed);
+          }
         }
+      } catch (error) {
+        // localStorage might be disabled or throw errors in private browsing mode
+        console.warn('Failed to load saved width from localStorage:', error);
       }
     }
   }, [storageKey, minWidth]);
 
-  // Save width to localStorage when it changes
+  // Save width to localStorage when it changes (debounced)
   useEffect(() => {
     if (storageKey) {
-      localStorage.setItem(storageKey, leftWidth.toString());
+      // Clear any pending save
+      if (saveTimeoutRef.current) {
+        clearTimeout(saveTimeoutRef.current);
+      }
+      
+      // Debounce saves to avoid excessive writes during drag
+      saveTimeoutRef.current = setTimeout(() => {
+        try {
+          localStorage.setItem(storageKey, leftWidth.toString());
+        } catch (error) {
+          console.warn('Failed to save width to localStorage:', error);
+        }
+      }, 100);
     }
+    
+    return () => {
+      if (saveTimeoutRef.current) {
+        clearTimeout(saveTimeoutRef.current);
+      }
+    };
   }, [leftWidth, storageKey]);
 
   const handleMouseDown = (e: React.MouseEvent) => {
@@ -118,7 +145,7 @@ export function ResizableSplitView({
 
     document.addEventListener('mousemove', handleMouseMove);
     document.addEventListener('mouseup', handleMouseUp);
-    document.addEventListener('touchmove', handleTouchMove);
+    document.addEventListener('touchmove', handleTouchMove, { passive: false });
     document.addEventListener('touchend', handleMouseUp);
 
     return () => {
