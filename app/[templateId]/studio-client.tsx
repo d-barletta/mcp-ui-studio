@@ -50,6 +50,7 @@ import { ThemeSwitcher } from '@/components/theme-switcher';
 import { Logo } from '@/components/logo';
 import { remoteButtonDefinition, remoteTextDefinition } from '@mcp-ui/client';
 import { VisualEditorHandle } from '@/components/visual-editor';
+import { ResizableSplitView } from '@/components/resizable-split-view';
 
 interface ConsoleMessage {
   id: number;
@@ -348,12 +349,13 @@ export default function StudioClient() {
           </div>
 
           <TabsContent value="preview" className="m-0 min-h-0 flex-1">
-            <div
-              className={`grid h-full min-h-0 divide-y lg:grid-cols-2 lg:grid-rows-none lg:divide-x lg:divide-y-0 ${isMaximized ? 'grid-rows-1' : 'grid-rows-2'}`}
-            >
-              {/* Preview Panel */}
-              <div className={`h-full overflow-hidden ${isMaximized ? 'hidden lg:block' : ''}`}>
-                <div className="h-full p-4">
+            <ResizableSplitView
+              storageKey="mcp-ui-studio-split-width"
+              defaultLeftWidth={50}
+              minWidth={20}
+              leftPanel={
+                <div className={`h-full overflow-hidden ${isMaximized ? 'hidden lg:block' : ''}`}>
+                  <div className="h-full p-4">
                   {currentContent.type === 'rawHtml' && (
                     <div className="h-full w-full overflow-auto rounded-lg border border-border bg-white">
                       <ui-resource-renderer
@@ -416,9 +418,9 @@ export default function StudioClient() {
                   )}
                 </div>
               </div>
-
-              {/* Right Panel with Tabs */}
-              <div className="flex h-full min-h-0 flex-col">
+              }
+              rightPanel={
+                <div className="flex h-full min-h-0 flex-col">
                 <div className="border-b bg-muted/50">
                   <div className="flex">
                     <button
@@ -642,7 +644,8 @@ export default function StudioClient() {
                   </div>
                 )}
               </div>
-            </div>
+              }
+            />
           </TabsContent>
 
           <TabsContent value="code" className="m-0 flex-1">
