@@ -1927,3 +1927,82 @@ ui-resource-renderer > div {
     98px 1231px var(--particles),
     408px 365px var(--particles);
 }
+
+#stars3 {
+  z-index: 0;
+  position: fixed;
+  width: 3px;
+  height: 3px;
+  background: transparent;
+  box-shadow:
+    1745px 456px var(--particles),
+    1123px 1832px var(--particles),
+    442px 1245px var(--particles),
+    1856px 923px var(--particles),
+    234px 678px var(--particles),
+    1567px 1123px var(--particles),
+    890px 234px var(--particles),
+    1234px 1678px var(--particles),
+    456px 1456px var(--particles),
+    1890px 567px var(--particles),
+    678px 890px var(--particles),
+    1012px 1234px var(--particles),
+    1678px 345px var(--particles),
+    345px 1890px var(--particles),
+    1456px 789px var(--particles),
+    789px 1567px var(--particles),
+    1234px 456px var(--particles),
+    567px 1123px var(--particles),
+    1890px 1345px var(--particles),
+    123px 789px var(--particles),
+    1567px 234px var(--particles),
+    890px 1678px var(--particles),
+    1234px 890px var(--particles),
+    456px 123px var(--particles),
+    1678px 1456px var(--particles),
+    345px 567px var(--particles),
+    1890px 1234px var(--particles),
+    789px 345px var(--particles),
+    1123px 1890px var(--particles),
+    234px 1567px var(--particles);
+  animation: animStar 300s linear infinite;
+}
+#stars3:after {
+  content: ' ';
+  position: absolute;
+  top: 2000px;
+  width: 3px;
+  height: 3px;
+  background: transparent;
+  box-shadow:
+    1745px 456px var(--particles),
+    1123px 1832px var(--particles),
+    442px 1245px var(--particles),
+    1856px 923px var(--particles),
+    234px 678px var(--particles),
+    1567px 1123px var(--particles),
+    890px 234px var(--particles),
+    1234px 1678px var(--particles),
+    456px 1456px var(--particles),
+    1890px 567px var(--particles),
+    678px 890px var(--particles),
+    1012px 1234px var(--particles),
+    1678px 345px var(--particles),
+    345px 1890px var(--particles),
+    1456px 789px var(--particles),
+    789px 1567px var(--particles),
+    1234px 456px var(--particles),
+    567px 1123px var(--particles),
+    1890px 1345px var(--particles),
+    123px 789px var(--particles),
+    1567px 234px var(--particles),
+    890px 1678px var(--particles),
+    1234px 890px var(--particles),
+    456px 123px var(--particles),
+    1678px 1456px var(--particles),
+    345px 567px var(--particles),
+    1890px 1234px var(--particles),
+    789px 345px var(--particles),
+    1123px 1890px var(--particles),
+    234px 1567px var(--particles);
+}

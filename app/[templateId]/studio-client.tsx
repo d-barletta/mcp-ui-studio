@@ -353,8 +353,9 @@ export default function StudioClient() {
               storageKey="mcp-ui-studio-split-width"
               defaultLeftWidth={50}
               minWidth={20}
+              controlledWidth={isMaximized ? 0 : undefined}
               leftPanel={
-                <div className={`h-full overflow-hidden ${isMaximized ? 'hidden lg:block' : ''}`}>
+                <div className="h-full overflow-hidden">
                   <div className="h-full p-4">
                   {currentContent.type === 'rawHtml' && (
                     <div className="h-full w-full overflow-auto rounded-lg border border-border bg-white">

@@ -12,6 +12,7 @@ interface ResizableSplitViewProps {
   minWidth?: number; // percentage (0-100)
   storageKey?: string; // localStorage key to persist size
   className?: string;
+  controlledWidth?: number; // external control of width (0-100), overrides internal state when provided
 }
 
 export function ResizableSplitView({
@@ -21,6 +22,7 @@ export function ResizableSplitView({
   minWidth = 20,
   storageKey,
   className = '',
+  controlledWidth,
 }: ResizableSplitViewProps) {
   const [leftWidth, setLeftWidth] = useState(defaultLeftWidth);
   const [isDragging, setIsDragging] = useState(false);
@@ -158,6 +160,9 @@ export function ResizableSplitView({
     };
   }, [isDragging, minWidth, isMobile]);
 
+  // Use controlled width if provided, otherwise use internal state
+  const effectiveWidth = controlledWidth !== undefined ? controlledWidth : leftWidth;
+
   return (
     <div
       ref={containerRef}
@@ -168,7 +173,7 @@ export function ResizableSplitView({
       <div
         className="h-full overflow-hidden"
         style={{
-          flexBasis: `${leftWidth}%`,
+          flexBasis: `${effectiveWidth}%`,
           flexShrink: 0,
           flexGrow: 0,
         }}
