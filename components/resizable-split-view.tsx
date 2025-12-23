@@ -30,13 +30,15 @@ export function ResizableSplitView({
 
   // Check if we're on mobile
   useEffect(() => {
+    const mediaQuery = window.matchMedia(`(max-width: ${LG_BREAKPOINT - 1}px)`);
+    
     const checkMobile = () => {
-      setIsMobile(window.innerWidth < LG_BREAKPOINT);
+      setIsMobile(mediaQuery.matches);
     };
     
     checkMobile();
-    window.addEventListener('resize', checkMobile);
-    return () => window.removeEventListener('resize', checkMobile);
+    mediaQuery.addEventListener('change', checkMobile);
+    return () => mediaQuery.removeEventListener('change', checkMobile);
   }, []);
 
   // Load saved width from localStorage on mount
@@ -205,4 +207,3 @@ export function ResizableSplitView({
     </div>
   );
 }
-
