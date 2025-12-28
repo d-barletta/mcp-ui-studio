@@ -4,6 +4,8 @@ import { formTemplates } from './forms';
 import { tableTemplates } from './tables';
 import { cardTemplates } from './cards';
 import { chartTemplates } from './charts';
+import { chatgptSdkTemplates } from './chatgpt-sdk';
+import { remoteDomTemplates } from './remote-dom';
 
 // Combine all templates from category files
 export const templates: Template[] = [
@@ -12,6 +14,8 @@ export const templates: Template[] = [
   ...tableTemplates,
   ...cardTemplates,
   ...chartTemplates,
+  ...chatgptSdkTemplates,
+  ...remoteDomTemplates,
 ];
 
 // Re-export category-specific arrays for direct access if needed
@@ -20,3 +24,5 @@ export { formTemplates } from './forms';
 export { tableTemplates } from './tables';
 export { cardTemplates } from './cards';
 export { chartTemplates } from './charts';
+export { chatgptSdkTemplates } from './chatgpt-sdk';
+export { remoteDomTemplates } from './remote-dom';
