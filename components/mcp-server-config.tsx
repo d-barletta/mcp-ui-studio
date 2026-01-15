@@ -74,7 +74,7 @@ export function MCPServerConfig({ onConfigChange }: MCPServerConfigProps) {
 
   const handleAddTool = () => {
     const newTool: ToolConfig = {
-      id: Date.now().toString(),
+      id: crypto.randomUUID(),
       name: `tool-${tools.length + 1}`,
       description: 'New tool',
       inputSchema: '{ "type": "object", "properties": {} }',
@@ -100,7 +100,7 @@ export function MCPServerConfig({ onConfigChange }: MCPServerConfigProps) {
 
   const handleAddResource = () => {
     const newResource: ResourceConfig = {
-      id: Date.now().toString(),
+      id: crypto.randomUUID(),
       uri: `ui://component/instance-${resources.length + 1}`,
       name: `Resource ${resources.length + 1}`,
       description: 'New resource',
@@ -126,7 +126,7 @@ export function MCPServerConfig({ onConfigChange }: MCPServerConfigProps) {
 
   const handleAddPrompt = () => {
     const newPrompt: PromptConfig = {
-      id: Date.now().toString(),
+      id: crypto.randomUUID(),
       name: `prompt-${prompts.length + 1}`,
       description: 'New prompt',
       template: 'You are a helpful assistant.',
