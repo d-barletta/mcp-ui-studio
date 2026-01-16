@@ -184,7 +184,7 @@ export function MCPServerConfig({ onConfigChange }: MCPServerConfigProps) {
                             variant="ghost"
                             onClick={() => handleRemoveTool(tool.id)}
                           >
-                            <Trash2 className="h-4 w-4 text-destructive" />
+                            <Trash2 className="h-4 w-4 text-white" />
                           </Button>
                         </div>
                         <div className="space-y-2">
@@ -259,7 +259,7 @@ export function MCPServerConfig({ onConfigChange }: MCPServerConfigProps) {
                             variant="ghost"
                             onClick={() => handleRemoveResource(resource.id)}
                           >
-                            <Trash2 className="h-4 w-4 text-destructive" />
+                            <Trash2 className="h-4 w-4 text-white" />
                           </Button>
                         </div>
                         <div className="space-y-2">
@@ -333,7 +333,7 @@ export function MCPServerConfig({ onConfigChange }: MCPServerConfigProps) {
                             variant="ghost"
                             onClick={() => handleRemovePrompt(prompt.id)}
                           >
-                            <Trash2 className="h-4 w-4 text-destructive" />
+                            <Trash2 className="h-4 w-4 text-white" />
                           </Button>
                         </div>
                         <div className="space-y-2">
