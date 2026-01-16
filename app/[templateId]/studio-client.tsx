@@ -26,6 +26,7 @@ import { Template, ContentType, AdapterConfig } from '@/lib/types';
 import { templates } from '@/lib/templates';
 import { ExportPanel } from '@/components/export-panel';
 import { CodeEditor } from '@/components/code-editor';
+import { MCPServerConfig } from '@/components/mcp-server-config';
 import { VisualEditor } from '@/components/visual-editor';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -45,6 +46,7 @@ import {
   Minimize2,
   Undo,
   Redo,
+  Server,
 } from 'lucide-react';
 import { ThemeSwitcher } from '@/components/theme-switcher';
 import { Logo } from '@/components/logo';
@@ -121,7 +123,7 @@ export default function StudioClient() {
   const [adapter, setAdapter] = useState<AdapterConfig>({ type: 'none' });
   const [editorCode, setEditorCode] = useState<string>('');
   const [contentError, setContentError] = useState<string | null>(null);
-  const [rightPanelTab, setRightPanelTab] = useState<'editor' | 'visual' | 'console'>('visual');
+  const [rightPanelTab, setRightPanelTab] = useState<'mcp-config' | 'visual' | 'console'>('visual');
   const [consoleMessages, setConsoleMessages] = useState<ConsoleMessage[]>([]);
   const [unreadCount, setUnreadCount] = useState(0);
   const [canUndo, setCanUndo] = useState(false);
@@ -436,15 +438,15 @@ export default function StudioClient() {
                       Visual
                     </button>
                     <button
-                      onClick={() => setRightPanelTab('editor')}
+                      onClick={() => setRightPanelTab('mcp-config')}
                       className={`flex-1 px-4 py-3 text-sm font-medium transition-colors ${
-                        rightPanelTab === 'editor'
+                        rightPanelTab === 'mcp-config'
                           ? 'border-b-2 border-primary bg-background text-foreground'
                           : 'text-muted-foreground hover:text-foreground'
                       }`}
                     >
-                      <Code className="mr-2 inline-block h-4 w-4" />
-                      Editor
+                      <Server className="mr-2 inline-block h-4 w-4" />
+                      MCP Config
                     </button>
                     <button
                       onClick={() => setRightPanelTab('console')}
@@ -525,30 +527,16 @@ export default function StudioClient() {
                   </div>
                 )}
 
-                {rightPanelTab === 'editor' && (
+                {rightPanelTab === 'mcp-config' && (
                   <div className="flex min-h-0 flex-1 flex-col">
                     <div className="flex items-center justify-between border-b bg-muted/50 p-4">
                       <div>
-                        <h3 className="font-semibold">createUIResource Options</h3>
+                        <h3 className="font-semibold">MCP Server Configuration</h3>
                         <p className="mt-1 text-xs text-muted-foreground">
-                          Edit options object (live preview)
+                          Configure server tools, resources, and prompts
                         </p>
                       </div>
                       <div className="flex items-center gap-2">
-                        {contentError && (
-                          <div className="flex items-center gap-2 rounded bg-red-500/10 px-2 py-1 text-xs font-semibold text-red-500">
-                            <AlertCircle className="h-4 w-4" />
-                            <span>{contentError}</span>
-                          </div>
-                        )}
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={handleRefresh}
-                          title="Refresh Preview"
-                        >
-                          <RotateCw className="h-3 w-3" />
-                        </Button>
                         <Button
                           variant="ghost"
                           size="sm"
@@ -565,11 +553,7 @@ export default function StudioClient() {
                       </div>
                     </div>
                     <div className="min-h-0 flex-1 overflow-hidden">
-                      <CodeEditor
-                        code={editorCode}
-                        language="typescript"
-                        onChange={handleContentChange}
-                      />
+                      <MCPServerConfig />
                     </div>
                   </div>
                 )}
